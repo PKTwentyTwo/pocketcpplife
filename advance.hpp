@@ -6,11 +6,16 @@
 #include <utility>
 #include <vector>
 #include "params.hpp"
-
 inline int64_t tokey(const int32_t x, const int32_t y) {
     // Converts an x and y coordinate to a 64-bit key.
     int64_t key;
+    #ifdef _WIN32
+    key = x+1073741824;
+    key = key << 31;
+    key += y + 1073741824;
+    #else
     key = 2147483648 * (x + 1073741824) + y + 1073741824;
+    #endif
     return key;
 }
 inline int32_t getx(const int64_t key) {

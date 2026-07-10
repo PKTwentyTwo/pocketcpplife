@@ -142,21 +142,21 @@ class Pattern {
     }
     std::string apgcode() {
         int32_t ptperiod = this->period();
-        int i, j;
+        int32_t i, j;
         if (ptperiod == -1) {
             return "aperiodic";
         }
         std::string suffix = getapgcodesuffix(lifevector, ptperiod);
         std::pair<int32_t, int32_t> disp = this->displacement(ptperiod);
-        if ((disp.first) or (disp.second)) {
+        if ((disp.first) || (disp.second)) {
             return "xq" + std::to_string(ptperiod) + "_" + suffix;
         }
         else if (ptperiod == 1) {
             return "xs" + std::to_string(this->population()) + "_" + suffix;
         }
         else {
-            return "xp" + std::to_string(ptperiod) + "_" + suffix;   
-        }        
+            return "xp" + std::to_string(ptperiod) + "_" + suffix;
+        }
     }
     std::string wechsler() {
         return getgridapgcode(lifevector);

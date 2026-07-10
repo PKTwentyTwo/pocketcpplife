@@ -20,15 +20,15 @@ std::string replace(const std::string string1, const std::string target, const s
 }
 ptvec rle_to_vector(const std::string rle) {
     // Converts an RLE to a grid.
-    int x = 0;
-    int y = 0;
+    int32_t x = 0;
+    int32_t y = 0;
     ptvec outvector;
     int32_t position = 0;
     std::string cstring = "";
     bool isnum = 0;
     uint8_t asciipos = 0;
-    int integer;
-    int i;
+    int32_t integer;
+    int32_t i;
     bool notfirstloop = 0;
     std::string op;
     while ((position + 1) < rle.length()) {
@@ -39,7 +39,7 @@ ptvec rle_to_vector(const std::string rle) {
             notfirstloop = 1;
         }
         asciipos = rle[position];
-        if (not isnum) {
+        if (isnum == 0) {
             if ((rle[position] == '#') || (rle[position] == 'x')) {
                 while ((rle[position] != '\n') && (position < rle.length() + 1)) {
                     position++;
@@ -216,7 +216,7 @@ std::string vector_to_RLE(ptvec& ptvector) {
 }
 ptvec translategrid(ptvec& ptvector, const int32_t dx, const int32_t dy) {
     ptvec newvec;
-    int i;
+    int32_t i;
     for (i = 0; i < ptvector.size(); i++) {
         auto [x, y] = ptvector[i];
         newvec.push_back(std::make_pair(x + dx, y + dy));
@@ -227,7 +227,7 @@ ptvec transformgrid(ptvec& ptvector, const std::string transformation) {
     // Applies the given transformation to a vector of coordinates.
     // (I'm not exactly a fan of coordinate geometry).
     ptvec newvec;
-    int i;
+    int32_t i;
     int32_t x, y;
     if (transformation == "identity") {
         for (i = 0; i < ptvector.size(); i++) {
@@ -288,7 +288,7 @@ ptvec transformgrid(ptvec& ptvector, const std::string transformation) {
 std::pair<int32_t, int32_t> getfirstcell(ptvec ptvector) {
     int32_t* bbox = getgridrect(ptvector);
     int32_t y = bbox[1];
-    int i;
+    int32_t i;
     int32_t minx = bbox[0] + bbox[2];
     for (auto i : ptvector) {
         if (i.second == y) {
@@ -322,7 +322,7 @@ ptvec defaultshiftgrid(ptvec& ptvector) {
 int64_t digestvector(ptvec& ptvector) {
     ptvec ptvector2 = defaultshiftgrid(ptvector);
     int64_t hash = 0;
-    int i;
+    int32_t i;
     for (auto i : ptvector2) {
         hash += hashpair(i);
     }
@@ -334,7 +334,7 @@ ptvec applyADD(ptvec vector1, ptvec vector2) {
     umap<int64_t,bool> trackermap;
     newvector.reserve(vector1.size() + vector2.size());
     trackermap.reserve(vector1.size() + vector2.size());
-    int i;
+    int32_t i;
     int64_t digest;
     for (auto i : vector1) {
         digest = hashpair(i);
@@ -342,7 +342,7 @@ ptvec applyADD(ptvec vector1, ptvec vector2) {
     }
     for (auto i : vector2) {
         digest = hashpair(i);
-        if (not trackermap[digest]) {
+        if (trackermap[digest] == 0) {
             newvector.push_back(i);
         }
     }
@@ -360,7 +360,7 @@ ptvec applyAND(ptvec vector1, ptvec vector2) {
     }
     newvector.reserve(maxsize);
     trackermap.reserve(vector1.size() + vector2.size());
-    int i;
+    int32_t i;
     int64_t digest;
     for (auto i : vector1) {
         digest = hashpair(i);
@@ -379,7 +379,7 @@ ptvec applySUB(ptvec vector1, ptvec vector2) {
     umap<int64_t,bool> trackermap;
     newvector.reserve(vector1.size());
     trackermap.reserve(vector1.size() + vector2.size());
-    int i;
+    int32_t i;
     int64_t digest;
     for (auto i : vector1) {
         digest = hashpair(i);
@@ -406,8 +406,8 @@ std::string getgridapgcode(ptvec& grid) {
     int32_t y = bbox[1];
     int32_t dx = bbox[2];
     int32_t dy = bbox[3];
-    int w, l, h;
-    int val = 0;
+    int32_t w, l, h;
+    int32_t val = 0;
     for (w = 0; w < ((dy - 1) / 5) + 1; w++) {
         if (w) {
             apgcode += 'z';
@@ -438,8 +438,8 @@ std::string getgridapgcode(ptvec& grid) {
     return apgcode;
 }
 std::string compareapgcode(const std::string apgcode1, const std::string apgcode2) {
-    const int size1 = apgcode1.length();
-    const int size2 = apgcode2.length();
+    const int32_t size1 = apgcode1.length();
+    const int32_t size2 = apgcode2.length();
     if (size1 < size2) {
         return apgcode1;
     }
@@ -454,13 +454,13 @@ std::string compareapgcode(const std::string apgcode1, const std::string apgcode
 std::string getapgcodesuffix(ptvec& grid, const int32_t period) {
     bool apgcodeknown = 0;
     std::string bestapgcode = "";
-    int i, j;
+    int32_t i, j;
     ptvec cgrid(grid);
     for (i = 0; i < period; i++) {
         for (auto j : orientations) {
             ptvec cgrid2 = transformgrid(cgrid, j);
             std::string gridapgcode = getgridapgcode(cgrid2);
-            if (not (apgcodeknown)) {
+            if (apgcodeknown == 0) {
                 bestapgcode = gridapgcode;
                 apgcodeknown = 1;
             }
@@ -470,7 +470,7 @@ std::string getapgcodesuffix(ptvec& grid, const int32_t period) {
         }
         cppadvance(cgrid, 1);
     }
-    if (not (bestapgcode.length())) {
+    if (bestapgcode.length() == 0) {
         bestapgcode = "0";
     }
     return bestapgcode;
@@ -481,7 +481,7 @@ ptvec apgcodetogrid(const std::string apgcode) {
     int32_t readpos = 0;
     int32_t value = 0;
     ptvec newvector;
-    int i, j;
+    int32_t i, j;
     std::string apgcode2, cstring;
     int32_t underscorepos = apgcode.find("_");
     for (i = underscorepos+1; i < apgcode.length(); i++) {

@@ -11,5 +11,7 @@ You can change certain parameters in the file [userparams.hpp](/userparams.hpp),
 
 ## Usage
 The library contains a C++ class, ```Pattern```, in [pattern.hpp](/pattern.hpp), which can be manipulated using a range of methods. The class supports two string formats for initialisation - [RLE](https://conwaylife.com/wiki/Run_Length_Encoded) (recommended for most cases) and [apgcodes](https://conwaylife.com/wiki/Apgcode) (useful in occasional cases). Example usage of class methods can be found in [test.cpp](/tests/test.cpp). 
+
+The library can be used on both POSIX and Windows systems, but is much faster on the former.
 ## Structure
 The internal structure storing the cells of a pattern is a ```std::vector<std::pair<int32_t, int32_t> >```, or in other words, a vector of coordinates. The exact structure can be accessed by using ```Pattern::coords()```.
