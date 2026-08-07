@@ -63,9 +63,9 @@ void advanceone(std::vector<std::pair<int32_t, int32_t> >& lifevector) {
         }
     }
 }
-void cppadvance(std::vector<std::pair<int32_t, int32_t> >& lifevector, const int32_t generations) {
+void cppadvance(std::vector<std::pair<int32_t, int32_t> >& lifevector, const uint32_t generations) {
     // Internal function used for advancing patterns (for other C++ functions).
-    uint32_t i;
+    size_t i;
     for (i = 0; i < generations; i++) {
         advanceone(lifevector);
     }

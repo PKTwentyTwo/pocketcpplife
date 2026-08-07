@@ -1,3 +1,4 @@
+
 # pocketcpplife
 Simple and compact C++ library for manipulation of patterns in cellular automata.
 ## Introduction
@@ -15,3 +16,9 @@ The library contains a C++ class, ```Pattern```, in [pattern.hpp](/pattern.hpp),
 The library can be used on both POSIX and Windows systems, but is much faster on the former.
 ## Structure
 The internal structure storing the cells of a pattern is a ```std::vector<std::pair<int32_t, int32_t> >```, or in other words, a vector of coordinates. The exact structure can be accessed by using ```Pattern::coords()```.
+
+## Python bindings
+Python bindings are avaliable by importing the library as a Python module. The function ```configparams``` is loaded, as well as a Python class ```Pattern```, which can be initialised with an RLE/apgcode and a rule (default ```b3s23```). 
+
+Each ```Pattern``` instance stores only three pieces of data: the rule, a wrapper class around a C++ shared object that contains library functions, and a pointer to a corresponding C++ pattern. Thus, all of the heavy lifting is done by C++, massively reducing the Python overhead.
+

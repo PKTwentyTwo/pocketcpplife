@@ -100,7 +100,7 @@ ptvec rle_to_vector(const std::string rle) {
     return outvector;
 }
 int32_t* getgridrect(ptvec& ptvector) {
-    int32_t* bbox = new int32_t[4];
+    int32_t* bbox = (int32_t*)malloc(4 * sizeof(int32_t));
     uint32_t i;
     for (i = 0; i < 4; i++) {
         bbox[i] = 0;
@@ -212,6 +212,7 @@ std::string vector_to_RLE(ptvec& ptvector) {
         rle = replace(rle, oseq, std::to_string(i) + 'o');
     }
     rle += '!';
+    free(bbox);
     return rle;
 }
 ptvec translategrid(ptvec& ptvector, const int32_t dx, const int32_t dy) {
@@ -227,6 +228,7 @@ ptvec transformgrid(ptvec& ptvector, const std::string transformation) {
     // Applies the given transformation to a vector of coordinates.
     // (I'm not exactly a fan of coordinate geometry).
     ptvec newvec;
+    newvec.reserve(ptvector.size());
     int32_t i;
     int32_t x, y;
     if (transformation == "identity") {
@@ -298,6 +300,7 @@ std::pair<int32_t, int32_t> getfirstcell(ptvec ptvector) {
         }
     }
     std::pair<int32_t, int32_t> outpair = std::make_pair(minx, y);
+    free(bbox);
     return outpair;
 }
 bool getcell(ptvec& grid, const int32_t x, const int32_t y) {
@@ -307,6 +310,7 @@ int64_t hashpair(const std::pair<int32_t, int32_t> coordpair) {
     int64_t hash = 17;
     hash = ((hash + coordpair.first) << 5) - (hash + coordpair.first);
     hash = ((hash + coordpair.second) << 5) - (hash + coordpair.second);
+    hash += coordpair.first + coordpair.second + coordpair.first * coordpair.second;
     return hash;
 }
 ptvec defaultshiftgrid(ptvec& ptvector) {
@@ -435,6 +439,7 @@ std::string getgridapgcode(ptvec& grid) {
     }
     apgcode = replace(apgcode, "000", "x");
     apgcode = replace(apgcode, "00", "w");
+    free(bbox);
     return apgcode;
 }
 std::string compareapgcode(const std::string apgcode1, const std::string apgcode2) {

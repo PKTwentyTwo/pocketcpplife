@@ -4,6 +4,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <iostream>
 #include "advance.hpp"
 #include "gridops.hpp"
 class Pattern {
@@ -23,19 +24,19 @@ class Pattern {
     Pattern(Pattern& pt) {
         lifevector = pt.coords();
     }
-    Pattern advance(int32_t generations) {
+    Pattern advance(uint32_t generations) {
         ptvec lifevector2(lifevector);
         cppadvance(lifevector2, generations);
         Pattern* newptr = new Pattern(lifevector2);
         return *newptr;
     }
-    Pattern operator[](int32_t numgens) {
+    Pattern operator[](uint32_t numgens) {
         return advance(numgens);
     }
     ptvec coords() {
         return lifevector;
     }
-    int64_t population() {
+    uint64_t population() {
         return lifevector.size();
     }
     int32_t* getrect() {
@@ -56,8 +57,8 @@ class Pattern {
     std::string rle_string() {
         return vector_to_RLE(lifevector);
     }
-    int32_t period() {
-        int32_t i;
+    uint32_t period() {
+        uint32_t i;
         int64_t initdigest = this->digest();
         Pattern pt2 = Pattern(lifevector);
         for (i = 1; i <= MAX_PERIOD; i++) {
@@ -67,10 +68,10 @@ class Pattern {
                 return i;
             }
         }
-        return -1;
+        return 0;
     }
     std::pair<int32_t, int32_t> displacement() {
-        int32_t ptperiod = this->period();
+        uint32_t ptperiod = this->period();
         if (ptperiod == -1) {
             return std::make_pair(0, 0);
         }
@@ -79,7 +80,7 @@ class Pattern {
         int32_t* bbox2 = pt2.getrect();
         return std::make_pair(bbox2[0] - bbox1[0], bbox2[1] - bbox1[1]);
     }
-    std::pair<int32_t, int32_t> displacement(int32_t ptperiod) {
+    std::pair<int32_t, int32_t> displacement(uint32_t ptperiod) {
         if (ptperiod == -1) {
             return std::make_pair(0, 0);
         }
@@ -141,7 +142,7 @@ class Pattern {
         return this->andpt(other);
     }
     std::string apgcode() {
-        int32_t ptperiod = this->period();
+        uint32_t ptperiod = this->period();
         int32_t i, j;
         if (ptperiod == -1) {
             return "aperiodic";
