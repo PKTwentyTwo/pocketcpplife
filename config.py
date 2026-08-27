@@ -270,7 +270,7 @@ const bool conditionset[512] = ''' + conditionarr + ';' + '''
     paramsfile = rootdir + '/params.hpp'
     with open(paramsfile, 'w', encoding='utf-8') as f:
         f.write(params)
-    sys.stderr.write('Configuration successful.')
+    sys.stderr.write('Configuration successful.\n')
 if __name__ == '__main__':
     rule = 'b3s23' if len(sys.argv) < 2 else sys.argv[1]
     configparams(rule)
