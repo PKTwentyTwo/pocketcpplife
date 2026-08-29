@@ -7,7 +7,7 @@
 #include <vector>
 #include "advance.hpp"
 #define ptvec std::vector<std::pair<int32_t, int32_t> >
-const std::vector<std::string> orientations = {"identity", "xp177_y334rot90", "rot180", "rot270", "flip_x", "flip_y", "swap_xy", "swap_xy_flip"};
+const std::vector<std::string> orientations = {"identity", "rot90", "rot180", "rot270", "flip_x", "flip_y", "swap_xy", "swap_xy_flip"};
 const char characters[37] = "0123456789abcdefghijklmnopqrstuvwxyz";
 std::string characterstring(characters);
 std::string replace(const std::string string1, const std::string target, const std::string replacement) {
@@ -140,7 +140,7 @@ std::string vector_to_RLE(ptvec& ptvector) {
     const int32_t x = *bbox;
     const int32_t dx = *(bbox + 2);
     const int32_t dy = *(bbox + 3);
-    std::string rle = "x = " + std::to_string(dx) + ", y = " + std::to_string(dy)  + ", rule = B3/S23\n";
+    std::string rle = "x = " + std::to_string(dx) + ", y = " + std::to_string(dy)  + ", rule = " + slashedrule + "\n";
     umap<int32_t, std::vector<int32_t> > rows;
     int32_t cx, cy;
     uint32_t i, j;
@@ -333,7 +333,6 @@ int64_t digestvector(ptvec& ptvector) {
     }
     return hash;
 }
-    
 ptvec applyADD(ptvec vector1, ptvec vector2) {
     ptvec newvector(vector1);
     umap<int64_t,bool> trackermap;

@@ -16,7 +16,7 @@ Throws an error if compilation is not possible, and otherwise returns the compil
     #Use mingw64 on Windows:
     if os.name == 'nt':
         return get_mingw_compiler()
-    #Check that g++ is avaliable:
+    #Check that a c++ compiler is avaliable:
     try:
         compiler = subprocess.check_output(['/bin/bash', 'which', 'c++']).decode('utf-8').replace('\n', '')
     except subprocess.CalledProcessError:
@@ -31,7 +31,7 @@ Try installing it with: one of the following:
 1. sudo apt install g++
 2. sudo apt install clang''')
     return compiler
-def compilelibrary(rule, compilerargs = ['-std=c++17', '-O3', '-Os', '-Ofast', '-flto']):
+def compilelibrary(rule, compilerargs = ['-std=c++17', '-O3', '-Os', '-Ofast']):
     '''Compiles a shared library for the given rule.'''
     if not isvalid(rule):
         raise ValueError('Rule '+str(rule)+' is not recognised as a non-B0 isotropic 2-state Moore rule.')

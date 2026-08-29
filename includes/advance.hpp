@@ -2,38 +2,23 @@
 #pragma once
 #include <algorithm>
 #include <cstdint>
+#include <cstdio>
 #include <unordered_map>
 #include <utility>
 #include <vector>
 #include "params.hpp"
 inline int64_t tokey(const int32_t x, const int32_t y) {
     // Converts an x and y coordinate to a 64-bit key.
-    int64_t key;
-    #ifdef _WIN32
-    key = x+1073741824;
-    key = key << 31;
-    key += y + 1073741824;
-    #else
-    key = 2147483648 * (x + 1073741824) + y + 1073741824;
-    #endif
-    return key;
+    return ((int64_t)x << 32) | (y & 0xFFFFFFFF);
 }
 inline int32_t getx(const int64_t key) {
     // Extracts the x coordinate from a 64-bit key.
-    int32_t x;
-    x = key >> 31;
-    x -= 1073741824;
-    return x;
+    return key >> 32;
 }
 inline int32_t gety(const int64_t key) {
     // Extracts the y coordinate from a 64-bit key.
-    int32_t y;
-    y = key % 2147483648;
-    y -= 1073741824;
-    return y;
+    return ((key << 32) >> 32);
 }
-// Saves time calculating exponents later:
-const int16_t neighbournum[9] = {1, 2, 4, 8, 16, 32, 64, 128, 256};
 #define MAXINC 9
 void advanceone(std::vector<std::pair<int32_t, int32_t> >& lifevector) {
     // Advances a std::vector of coordinates in place by one generation.
@@ -44,13 +29,13 @@ void advanceone(std::vector<std::pair<int32_t, int32_t> >& lifevector) {
     neighbours.reserve(MAXINC * lifevector.size());
     int32_t x, y;
     uint8_t dx, dy;
-    std::pair<int32_t, int32_t> cpair;
     // Calculating neighbours:
-    for (i = 0; i < (lifevector.size()); i++) {
+    const size_t vsize = lifevector.size();
+    for (i = 0; i < (vsize); i++) {
         auto [x, y] = lifevector[i];
         for (dx = 0; dx < 3; dx++) {
             for (dy = 0; dy < 3; dy++) {
-                neighbours[tokey(x + dx - 1, y + dy - 1)] += neighbournum[3*dy + dx];
+                neighbours[tokey(x + dx - 1, y + dy - 1)] += 1 << (3*dy + dx);
             }
         }
     }

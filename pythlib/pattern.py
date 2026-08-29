@@ -1,6 +1,8 @@
 '''Main Python bindings.'''
 from ctypes import *
 import os
+import urllib.request
+from collections import defaultdict
 from .compiler import compilelibrary, libdir, rootdir
 from ..config import canoniserule
 def find_lib(rule):
@@ -114,6 +116,7 @@ class Pattern:
             self.lib = libraries[self.rule]
         else:
             raise TypeError('Unable to initialise Pattern with argument of type '+str(type(rle))[7:-1])
+    #Most of the below functions are just C++ wrappers.
     def advance(self, gens):
         '''Advances a pattern the specified number of generations.'''
         newptr = self.lib('AdvancePattern', self.ptr, gens)
@@ -136,6 +139,7 @@ class Pattern:
         newptr = self.lib('TranslatePattern', self.ptr, dx, dy)
         return Pattern(PtStruct(self.rule, newptr), self.rule)
     def shift(self, dx, dy):
+        '''Shifts the pattern by (dx, dy).'''
         return self.translate(dx, dy)
     def transform(self, transformation):
         '''Transforms the pattern by the given transformation.'''
@@ -151,6 +155,7 @@ class Pattern:
             return self.transform(*args)
         raise TypeError("Usage: pt(dx, dy) or pt('rot90')")
     def digest(self) -> int:
+        '''Calculates a position-independent orientation-dependent digest of the pattern.'''
         return self.lib('GetDigest', self.ptr)
     def __hash__(self):
         return self.digest()
@@ -209,6 +214,7 @@ Will throw an error if aperiodic.'''
         typename = str(type(self))[8:-2]      
         data = '(population = '+str(self.population)+', rule = '+self.rule+', pointer = '+str(self.ptr) + ')'
         return '<' + typename + data + '>'
+#Soup related functions that don't really fit as class methods:
 def hashsoup(rule = 'b3s23', instring = 'test', sym = 'C1'):
     '''Generates a soup based on an SHA-256 hash of the instring.'''
     rule = canoniserule(rule)
@@ -219,3 +225,47 @@ def hashsoup(rule = 'b3s23', instring = 'test', sym = 'C1'):
     pts = PtStruct(rule, ptr)
     pt = Pattern(pts, rule)
     return pt
+#Class which reduces the computation of soup downloading:
+class SampleSoupList:
+    '''Class storing a list of downloaded soups from Catagolue.'''
+    def __init__(self, apgcode, rule, sym, seeds):
+        self.apgcode = apgcode
+        self.rule = rule
+        self.seeds = seeds
+        self.sym = sym
+        self.soups = []
+        for x in range(len(seeds)):
+            self.soups.append(None)
+    def __len__(self):
+        return len(self.seeds)
+    def __getitem__(self, index):
+        if self.soups[index] is None:
+            self.soups[index] = hashsoup(self.rule, self.seeds[index], self.sym)
+        return self.soups[index]
+    def __repr__(self):
+        return f'SampleSoupList<apgcode={self.apgcode}, rule={self.rule}, sym={self.sym}, length={len(self)}'
+#May need changing if you live in a country where you have to use Catagolue mirrors,
+#or are on a system without proper SSL/TLS support, or any other horrific edge case.
+CATAGOLUE_URL = 'https://catagolue.hatsya.com'
+def download_soups(apgcode, rule='b3s23'):
+    '''Downloads all soups on Catagolue that produce the target object.'''
+    c = urllib.request.urlopen(CATAGOLUE_URL + '/textsamples/' + apgcode + '/' + rule)
+    response = c.read().decode('utf-8')
+    soups = defaultdict(list)
+    for x in response.split('\n'):
+        data = x.split('/')
+        if len(data) != 2:
+            continue
+        symmetry, seed = data[0], data[1]
+        soups[symmetry].append(seed)
+    outputdict = {}
+    for x in soups:
+        outputdict[x] = SampleSoupList(apgcode, rule, x, soups[x])
+    return outputdict
+def download_synthesis(apgcode):
+    '''Downloads a glider synthesis from Catagolue.'''
+    c = urllib.request.urlopen(CATAGOLUE_URL+'/textsamples/'+apgcode+'/'+'b3s23/synthesis')
+    response = c.read().decode('utf-8')
+    if 'x' in response:
+        return Pattern(response, 'b3s23')
+    return None
