@@ -267,7 +267,7 @@ const bool conditionset[512] = ''' + conditionarr + ';' + '''
 #include <unordered_map>
 #define umap std::unordered_map
 #endif'''
-    paramsfile = rootdir + '/params.hpp'
+    paramsfile = rootdir + '/includes/params.hpp'
     with open(paramsfile, 'w', encoding='utf-8') as f:
         f.write(params)
     sys.stderr.write('Configuration successful.\n')

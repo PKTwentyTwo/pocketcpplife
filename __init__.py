@@ -1,4 +1,4 @@
 '''Python bindings for the C++ patterns.'''
 from .config import configparams
-from .pattern import Pattern
-__all__ = ['configparams', 'Pattern']
+from .pythlib.pattern import hashsoup, Pattern
+__all__ = ['configparams', 'hashsoup', 'Pattern']

@@ -4,9 +4,9 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include <iostream>
-#include "advance.hpp"
-#include "gridops.hpp"
+#include "includes/advance.hpp"
+#include "includes/gridops.hpp"
+#include "includes/hashsoup.hpp"
 class Pattern {
     ptvec lifevector;
     public:
@@ -169,3 +169,8 @@ class Pattern {
         return (!(*this == other));
     }
 };
+
+Pattern hashsoup(std::string instring, std::string sym) {
+    ptvec soup = _hashsoup(instring, sym);
+    return Pattern(soup);
+}

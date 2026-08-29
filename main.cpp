@@ -1,5 +1,4 @@
 #include "pattern.hpp"
-#include <iostream>
 #include <cstring>
 extern "C" {
 void* NewPattern(const char* rle) {
@@ -48,22 +47,22 @@ void* SubtractPattern(void* ptr1, void* ptr2) {
     Pattern* pt3 = new Pattern(pt1->subpt(*pt2));
     return reinterpret_cast<void*>(pt3);
 }    
-void* AdvancePattern(void* ptr, int32_t gens) {
+void* AdvancePattern(void* ptr, const int32_t gens) {
     Pattern* pt = reinterpret_cast<Pattern*>(ptr);
     Pattern* pt2 = new Pattern(pt->advance(gens).coords());
     return reinterpret_cast<void*>(pt2);
 }
-void* TranslatePattern(void* ptr, int32_t dx, int32_t dy) {
+void* TranslatePattern(void* ptr, const int32_t dx, const int32_t dy) {
     Pattern* pt = reinterpret_cast<Pattern*>(ptr);
     Pattern* pt2 = new Pattern(pt->translate(dx, dy));
     return reinterpret_cast<void*>(pt2);
 }
-void* TransformPattern(void* ptr, char* transformation) {
+void* TransformPattern(void* ptr, const char* transformation) {
     Pattern* pt = reinterpret_cast<Pattern*>(ptr);
     Pattern* pt2 = new Pattern(pt->transform(transformation));
     return reinterpret_cast<void*>(pt2);
 }
-void GetPatternRLE(void* ptr, char* buffer, int buflen) {
+void GetPatternRLE(void* ptr, char* buffer, const int buflen) {
     Pattern* pt = reinterpret_cast<Pattern*>(ptr);
     std::string rle = pt->rle_string();
     if (rle.length() < buflen) {
@@ -76,7 +75,7 @@ void GetPatternRLE(void* ptr, char* buffer, int buflen) {
         memcpy(buffer, cerrormsg, strlen(cerrormsg));
     }
 }
-void GetPatternApgcode(void* ptr, char* buffer, int buflen) {
+void GetPatternApgcode(void* ptr, char* buffer, const int buflen) {
     Pattern* pt = reinterpret_cast<Pattern*>(ptr);
     std::string apgcode = pt->apgcode();
     if (apgcode.length() < buflen) {
@@ -98,12 +97,15 @@ void GetDisplacement(void* ptr, int32_t* buffer) {
 void GetPatternRect(void* ptr, int32_t* buffer) {
     Pattern* pt = reinterpret_cast<Pattern*>(ptr);
     int32_t* rect = pt->getrect();
-    std::cout << rect[0] << "," << rect[1] << "," << rect[2] << std::endl;
     for (int i = 0; i < 4; i++) {
         buffer[i] = rect[i];
     }
     free(rect);
-}   
+}
+void* PatternHashsoup(const char* instring, const char* symmetry) {
+    Pattern* pt = new Pattern(hashsoup(instring, symmetry));
+    return reinterpret_cast<void*>(pt);
+}
 void DeletePattern(void* ptr) {
     delete reinterpret_cast<Pattern*>(ptr);
 }
