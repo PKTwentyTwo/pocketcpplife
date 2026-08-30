@@ -31,7 +31,7 @@ ptvec rle_to_vector(const std::string rle) {
     int32_t integer;
     int32_t i;
     bool notfirstloop = 0;
-    std::string op;
+    char op;
     while ((position + 1) < rle.length()) {
         if (notfirstloop) {
             position++;
@@ -53,7 +53,7 @@ ptvec rle_to_vector(const std::string rle) {
             }
             else {
                 op = rle[position];
-                if (op == "\n") {
+                if (op == '\n') {
                     continue;
                 }
                 if (cstring != "") {
@@ -67,20 +67,20 @@ ptvec rle_to_vector(const std::string rle) {
                 else {
                     integer = 1;
                 }
-                if (op == "o") {
+                if (op == 'o') {
                     for (i = 0; i < integer; i++) {
                         outvector.push_back(std::make_pair(x + i, y));
                     }
                     x += integer;
                 }
-                else if (op == "b") {
+                else if (op == 'b') {
                     x += integer;
                 }
-                else if (op == "$") {
+                else if (op == '$') {
                     x = 0;
                     y += integer;
                 }
-                else if (op == "!") {
+                else if (op == '!') {
                     break;
                 }
                 cstring = "";

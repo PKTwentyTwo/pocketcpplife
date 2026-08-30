@@ -255,8 +255,8 @@ def configparams(rule):
     params = '''// Core parameters.
 #pragma once
 #include <string>
-std::string rule = "''' + rule + '''";
-std::string slashedrule = "''' + slashedrule + '''";
+const std::string rule = "''' + rule + '''";
+const std::string slashedrule = "''' + slashedrule + '''";
 // Used for the actual simulation logic.
 // The boolean array's contents will depend upon the rule being simulated.
 const bool conditionset[512] = ''' + conditionarr + ';' + '''

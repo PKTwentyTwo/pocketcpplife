@@ -2,7 +2,6 @@
 #pragma once
 #include <algorithm>
 #include <cstdint>
-#include <cstdio>
 #include <unordered_map>
 #include <utility>
 #include <vector>
