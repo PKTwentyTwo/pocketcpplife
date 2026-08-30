@@ -22,3 +22,10 @@ Python bindings are avaliable by importing the library as a Python module. The f
 
 Each ```Pattern``` instance stores only three pieces of data: the rule, a wrapper class around a C++ shared object that contains library functions, and a pointer to a corresponding C++ pattern. Thus, all of the heavy lifting is done by C++, massively reducing the Python overhead.
 
+Compilation is done automatically if using the library from Python, using g++/clang on POSIX and mingw64 on Windows.
+
+### Other functions
+Other functions are avaliable for the Python bindings:
+- `hashsoup(rule, instring, sym)`: Produces a Pattern instance in `rule` based on the SHA-256 hash of `instring` and the specified symmetry.
+- `download_soups(apgcode, rule)`: Returns a dictionary mapping symmetries to lists of sample soups, downloaded from Catagolue.
+- `download_synthesis(apgcode)`: Downloads the glider synthesis for a pattern from Catagolue, returning None if it has none, and a Pattern otherwise.

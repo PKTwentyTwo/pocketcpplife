@@ -6,6 +6,7 @@
 #include <utility>
 #include <vector>
 #include "advance.hpp"
+#include "sha256.h"
 #define ptvec std::vector<std::pair<int32_t, int32_t> >
 const std::vector<std::string> orientations = {"identity", "rot90", "rot180", "rot270", "flip_x", "flip_y", "swap_xy", "swap_xy_flip"};
 const char characters[37] = "0123456789abcdefghijklmnopqrstuvwxyz";
@@ -26,11 +27,11 @@ ptvec rle_to_vector(const std::string rle) {
     ptvec outvector;
     int32_t position = 0;
     std::string cstring = "";
-    bool isnum = 0;
+    bool isnum = false;
     uint8_t asciipos = 0;
     int32_t integer;
     int32_t i;
-    bool notfirstloop = 0;
+    bool notfirstloop = false;
     char op;
     while ((position + 1) < rle.length()) {
         if (notfirstloop) {
@@ -308,9 +309,9 @@ bool getcell(ptvec& grid, const int32_t x, const int32_t y) {
     return (std::count(grid.begin(), grid.end(), std::make_pair(x, y)) != 0);
 }
 int64_t hashpair(const std::pair<int32_t, int32_t> coordpair) {
-    int64_t hash = 17;
-    hash = ((hash + coordpair.first) << 5) - (hash + coordpair.first);
-    hash = ((hash + coordpair.second) << 5) - (hash + coordpair.second);
+    int64_t hash = 23;
+    hash = ((hash + coordpair.first) << 7) - (hash + coordpair.first);
+    hash = ((hash + coordpair.second) << 7) - (hash + coordpair.second);
     hash += coordpair.first + coordpair.second + coordpair.first * coordpair.second;
     return hash;
 }
@@ -323,15 +324,6 @@ ptvec defaultshiftgrid(ptvec& ptvector) {
     else {
         return translategrid(ptvector, 0, 0);
     }
-}
-int64_t digestvector(ptvec& ptvector) {
-    ptvec ptvector2 = defaultshiftgrid(ptvector);
-    int64_t hash = 0;
-    int32_t i;
-    for (auto i : ptvector2) {
-        hash += hashpair(i);
-    }
-    return hash;
 }
 ptvec applyADD(ptvec vector1, ptvec vector2) {
     ptvec newvector(vector1);
@@ -439,6 +431,16 @@ std::string getgridapgcode(ptvec& grid) {
     }
     apgcode = replace(apgcode, "000", "x");
     apgcode = replace(apgcode, "00", "w");
+    for(;;) {
+        size_t length = apgcode.length();
+        if (apgcode[length - 2] == 'y') {
+            apgcode = apgcode.substr(0, length - 2);
+        }
+        else {
+            break;
+        }
+    }
+        
     free(bbox);
     return apgcode;
 }
@@ -457,7 +459,7 @@ std::string compareapgcode(const std::string apgcode1, const std::string apgcode
     return apgcode2;
 }
 std::string getapgcodesuffix(ptvec& grid, const int32_t period) {
-    bool apgcodeknown = 0;
+    bool apgcodeknown = false;
     std::string bestapgcode = "";
     int32_t i, j;
     ptvec cgrid(grid);
@@ -527,6 +529,25 @@ ptvec apgcodetogrid(const std::string apgcode) {
         readpos++;
     }
     return newvector;
+}
+/* Old hash function that caused collisions:
+int64_t digestvector(ptvec& ptvector) {
+    ptvec ptvector2 = defaultshiftgrid(ptvector);
+    int64_t hash = 0;
+    int32_t i;
+    for (auto i : ptvector2) {
+        hash += hashpair(i);
+    }
+    return hash;
+}
+*/
+int64_t digestvector(ptvec& ptvector) {
+    int64_t outhash;
+    std::string gridapgcode = getgridapgcode(ptvector);
+    uint8_t* digest = sha256_str(gridapgcode.c_str());
+    memcpy(&outhash, digest, 8);
+    free(digest);
+    return outhash;
 }
 bool isapgcode(const std::string apgcode) {
     if (apgcode[0] != 'x') {

@@ -107,7 +107,7 @@ class Pattern:
         if isinstance(rle, str):
             self.ptr = self.lib('NewPattern', rle)
         elif isinstance(rle, Pattern):
-            self.ptr = self.lib('CopyPattern', rle)
+            self.ptr = self.lib('CopyPattern', rle.ptr)
             self.rule = rle.rule
             self.lib = libraries[self.rule]
         elif isinstance(rle, PtStruct):
@@ -257,6 +257,8 @@ def download_soups(apgcode, rule='b3s23'):
         if len(data) != 2:
             continue
         symmetry, seed = data[0], data[1]
+        if 'stdin' not in symmetry.lower() and symmetry[0] in ['G', 'H']:
+            symmetry = symmetry[0].replace('G', 'C').replace('H', 'D') + symmetry[1:]
         soups[symmetry].append(seed)
     outputdict = {}
     for x in soups:
