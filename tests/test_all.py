@@ -1,5 +1,9 @@
 '''Unit tests for the Python bindings.'''
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 from pocketcpplife import *
+reset()
 import unittest
 class TestPatternMethods(unittest.TestCase):
 
@@ -34,8 +38,8 @@ $6b2obobob2o$6bo2bobo2bo$7b2o3b2o!
 bo$obo$bo8$8bo$6bobo$5b2obo2$4b3o!
 ''', 'b3s23')
         self.assertEqual(pt.population, 13)
-        #evpt = pt[29055]
-        #self.assertEqual(evpt.population, 1625)
+        evpt = pt[29055]
+        self.assertEqual(evpt.population, 1625)
     def test_logic(self):
         #Test boolean pattern comparison and emptiness.
         pt1 = Pattern('''x = 4, y = 5, rule = B3/S23

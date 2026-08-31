@@ -1,8 +1,7 @@
-// Automatically generated C++ header for simulating b3s23
+// Header responsible for advancing patterns.
 #pragma once
 #include <algorithm>
 #include <cstdint>
-#include <unordered_map>
 #include <utility>
 #include <vector>
 #include "params.hpp"

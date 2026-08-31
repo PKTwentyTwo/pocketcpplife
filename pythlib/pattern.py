@@ -115,7 +115,7 @@ class Pattern:
             self.rule = rle.rule
             self.lib = libraries[self.rule]
         else:
-            raise TypeError('Unable to initialise Pattern with argument of type '+str(type(rle))[7:-1])
+            raise TypeError('Unable to initialise Pattern with argument of type '+str(type(rle))[7:-1])       
     #Most of the below functions are just C++ wrappers.
     def advance(self, gens):
         '''Advances a pattern the specified number of generations.'''
@@ -209,7 +209,9 @@ Will throw an error if aperiodic.'''
         return (disp[0], disp[1])
     def __del__(self):
         #Delete the C++ object:
-        self.lib('DeletePattern', self.ptr)
+        if hasattr(self, 'lib'):
+            if hasattr(self.lib, 'DeletePattern'):
+                self.lib('DeletePattern', self.ptr)
     def __repr__(self):
         typename = str(type(self))[8:-2]      
         data = '(population = '+str(self.population)+', rule = '+self.rule+', pointer = '+str(self.ptr) + ')'

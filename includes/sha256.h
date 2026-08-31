@@ -9,9 +9,7 @@ sha256_str(const char* string)                              -> Same as above, bu
 sha256_hexdigest(const void* start, const size_t bytes)     -> char* to a 64-character C string containing the hexdigest of the hash.
 sha256_str_hexdigest(const char* string)                    -> Same as above, but for the hexdigest of a (C) string.
 
-I don't advise using these functions for cryptography.
-
-
+I don't advise using these functions for cryptography - I have no clue how to make an implementation secure.
 
 
 Since this is probably going to be reused across multiple projects, might as well add a license:
@@ -35,6 +33,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
 */
 #pragma once
 #include <endian.h>
@@ -178,16 +177,15 @@ uint8_t* sha256_str(const char* string) {
 // Hexdigest:
 char* sha256_hexdigest(const void* start, const size_t bytes) {
     uint8_t* digest = _hash_bytes(start, bytes);
+    // 65 character string for output:
     char* hexdigest = (char*)calloc(65, sizeof(char));
+    // Ensure null-termination:
     hexdigest[64] = 0;
-    char hexchars[17] = "0123456789abcdef";
-    char buffer[3];
-    buffer[2] = 0;
+    const char hexchars[17] = "0123456789abcdef";
     for (int i = 0; i < 32; i++) {
         uint8_t cbyte = digest[i];
-        buffer[0] = hexchars[(int)(cbyte / 16)];
-        buffer[1] = hexchars[cbyte % 16];
-        strcat(hexdigest, buffer);
+        hexdigest[2*i] = hexchars[(int)(cbyte / 16)];
+        hexdigest[2*i+1] = hexchars[cbyte % 16];
     }
     free(digest);
     return hexdigest;

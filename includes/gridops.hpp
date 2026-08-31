@@ -7,7 +7,7 @@
 #include <vector>
 #include "advance.hpp"
 #include "sha256.h"
-#define ptvec std::vector<std::pair<int32_t, int32_t> >
+typedef std::vector<std::pair<int32_t, int32_t> > ptvec;
 const std::vector<std::string> orientations = {"identity", "rot90", "rot180", "rot270", "flip_x", "flip_y", "swap_xy", "swap_xy_flip"};
 const char characters[37] = "0123456789abcdefghijklmnopqrstuvwxyz";
 std::string characterstring(characters);
@@ -101,7 +101,7 @@ ptvec rle_to_vector(const std::string rle) {
     }
     return outvector;
 }
-int32_t* getgridrect(ptvec& ptvector) {
+int32_t* getgridrect(const ptvec& ptvector) {
     int32_t* bbox = (int32_t*)malloc(4 * sizeof(int32_t));
     uint32_t i;
     for (i = 0; i < 4; i++) {
@@ -136,7 +136,8 @@ int32_t* getgridrect(ptvec& ptvector) {
     bbox[3] = maxy - miny + 1;
     return bbox;
 }
-std::string vector_to_RLE(ptvec& ptvector) {
+// Converts a vector of coordinates to the Run Length Encoding format (RLE):
+std::string vector_to_RLE(const ptvec& ptvector) {
     int32_t* bbox = getgridrect(ptvector);
     const int32_t x = *bbox;
     const int32_t dx = *(bbox + 2);
@@ -217,7 +218,8 @@ std::string vector_to_RLE(ptvec& ptvector) {
     free(bbox);
     return rle;
 }
-ptvec translategrid(ptvec& ptvector, const int32_t dx, const int32_t dy) {
+// Translates every cell in a grid by the (regular maths) vector (dx, dy):
+ptvec translategrid(const ptvec& ptvector, const int32_t dx, const int32_t dy) {
     ptvec newvec;
     int32_t i;
     for (i = 0; i < ptvector.size(); i++) {
@@ -226,9 +228,9 @@ ptvec translategrid(ptvec& ptvector, const int32_t dx, const int32_t dy) {
     }
     return newvec;
 }
-ptvec transformgrid(ptvec& ptvector, const std::string transformation) {
+ptvec transformgrid(const ptvec& ptvector, const std::string transformation) {
     // Applies the given transformation to a vector of coordinates.
-    // (I'm not exactly a fan of coordinate geometry).
+    // (I'm not exactly a fan of coordinate geometry, but at least I can avoid matrices here).
     ptvec newvec;
     newvec.reserve(ptvector.size());
     int32_t i;
@@ -289,7 +291,8 @@ ptvec transformgrid(ptvec& ptvector, const std::string transformation) {
     }
     return newvec;
 }
-std::pair<int32_t, int32_t> getfirstcell(ptvec ptvector) {
+// Gets the first cell in a grid:
+std::pair<int32_t, int32_t> getfirstcell(const ptvec& ptvector) {
     int32_t* bbox = getgridrect(ptvector);
     int32_t y = bbox[1];
     int32_t i;
@@ -305,7 +308,7 @@ std::pair<int32_t, int32_t> getfirstcell(ptvec ptvector) {
     free(bbox);
     return outpair;
 }
-bool getcell(ptvec& grid, const int32_t x, const int32_t y) {
+bool getcell(const ptvec& grid, const int32_t x, const int32_t y) {
     return (std::count(grid.begin(), grid.end(), std::make_pair(x, y)) != 0);
 }
 int64_t hashpair(const std::pair<int32_t, int32_t> coordpair) {
@@ -315,7 +318,7 @@ int64_t hashpair(const std::pair<int32_t, int32_t> coordpair) {
     hash += coordpair.first + coordpair.second + coordpair.first * coordpair.second;
     return hash;
 }
-ptvec defaultshiftgrid(ptvec& ptvector) {
+ptvec defaultshiftgrid(const ptvec& ptvector) {
     if (ptvector.size() != 0) {
         std::pair<int32_t, int32_t> firstcell = getfirstcell(ptvector);
         ptvec ptvector2 = translategrid(ptvector, -firstcell.first, -firstcell.second);
@@ -325,7 +328,7 @@ ptvec defaultshiftgrid(ptvec& ptvector) {
         return translategrid(ptvector, 0, 0);
     }
 }
-ptvec applyADD(ptvec vector1, ptvec vector2) {
+ptvec applyADD(const ptvec& vector1, const ptvec& vector2) {
     ptvec newvector(vector1);
     umap<int64_t,bool> trackermap;
     newvector.reserve(vector1.size() + vector2.size());
@@ -344,7 +347,7 @@ ptvec applyADD(ptvec vector1, ptvec vector2) {
     }
     return newvector;
 }
-ptvec applyAND(ptvec vector1, ptvec vector2) {
+ptvec applyAND(const ptvec& vector1, const ptvec& vector2) {
     ptvec newvector;
     umap<int64_t,bool> trackermap;
     int32_t maxsize;
@@ -370,7 +373,7 @@ ptvec applyAND(ptvec vector1, ptvec vector2) {
     }
     return newvector;
 }
-ptvec applySUB(ptvec vector1, ptvec vector2) {
+ptvec applySUB(const ptvec& vector1, const ptvec& vector2) {
     ptvec newvector;
     umap<int64_t,bool> trackermap;
     newvector.reserve(vector1.size());
@@ -394,7 +397,7 @@ ptvec applySUB(ptvec vector1, ptvec vector2) {
     }
     return newvector;
 }
-std::string getgridapgcode(ptvec& grid) {
+std::string getgridapgcode(const ptvec& grid) {
     std::string apgcode;
     ptvec newgrid = defaultshiftgrid(grid);
     int32_t* bbox = getgridrect(newgrid);
@@ -458,7 +461,7 @@ std::string compareapgcode(const std::string apgcode1, const std::string apgcode
     }
     return apgcode2;
 }
-std::string getapgcodesuffix(ptvec& grid, const int32_t period) {
+std::string getapgcodesuffix(const ptvec& grid, const int32_t period) {
     bool apgcodeknown = false;
     std::string bestapgcode = "";
     int32_t i, j;
@@ -541,12 +544,31 @@ int64_t digestvector(ptvec& ptvector) {
     return hash;
 }
 */
-int64_t digestvector(ptvec& ptvector) {
+int llcmp(const void* a, const void* b) {
+    int64_t num1 = *(const int64_t*)a;
+    int64_t num2 = *(const int64_t*)b;
+    if (num1 < num2) {
+        return 1;
+    }
+    if (num1 > num2) {
+        return -1;
+    }
+    return 0;
+}
+int64_t digestvector(const ptvec& ptvector) {
+    ptvec ptvector2 = defaultshiftgrid(ptvector);
     int64_t outhash;
-    std::string gridapgcode = getgridapgcode(ptvector);
-    uint8_t* digest = sha256_str(gridapgcode.c_str());
-    memcpy(&outhash, digest, 8);
-    free(digest);
+    int64_t* hasharr = (int64_t*)malloc(sizeof(int64_t) * ptvector2.size());
+    size_t pos = 0;
+    size_t length = ptvector2.size();
+    for (pos = 0; pos < length; pos++) {
+        hasharr[pos] = hashpair(ptvector2[pos]);
+    }
+    qsort(hasharr, length, sizeof(int64_t), llcmp);
+    uint8_t* hashed = sha256(hasharr, length * 8);
+    free(hasharr);
+    memcpy(&outhash, hashed, 8);
+    free(hashed);
     return outhash;
 }
 bool isapgcode(const std::string apgcode) {

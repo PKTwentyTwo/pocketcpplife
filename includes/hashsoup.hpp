@@ -1,7 +1,6 @@
 /* Function for generating soups procedurally based on an SHA256 hash.
 The SHA-256 implementation used, sha256.h, is written by me and not third-party. */
 #pragma once
-#include <cstdbool>
 #include <cstdint>
 #include <set>
 #include <string>
@@ -38,6 +37,7 @@ ptvec filtersoup(const ptvec thesoup) {
     return newsoup;
 }
 // This function is a C++ translation of a Python 3 translation of a Python 2 function.
+// There may be a few problems.
 ptvec _hashsoup(std::string instring, std::string sym) {
     std::string lsym = tolower(sym);
     bool is_stdin = (lsym.find("stdin") != std::string::npos);
@@ -114,7 +114,7 @@ ptvec _hashsoup(std::string instring, std::string sym) {
         if (d >= 1) {
             souplength = thesoup.size();
             for (i = 0; i < souplength; i++) {
-                std::pair<uint32_t, uint32_t> cpair = thesoup[i];
+                std::pair<int32_t, int32_t> cpair = thesoup[i];
                 thesoup.push_back(std::make_pair(cpair.second, cpair.first));
             }
             if (d == 2) {
@@ -122,14 +122,14 @@ ptvec _hashsoup(std::string instring, std::string sym) {
                     
                     souplength = thesoup.size();
             for (i = 0; i < souplength; i++) {
-                        std::pair<uint32_t, uint32_t> cpair = thesoup[i];
+                        std::pair<int32_t, int32_t> cpair = thesoup[i];
                         thesoup.push_back(std::make_pair(-cpair.second, -cpair.first));
                     }
                 }
                 else {
                     souplength = thesoup.size();
             for (i = 0; i < souplength; i++) {
-                        std::pair<uint32_t, uint32_t> cpair = thesoup[i];
+                        std::pair<int32_t, int32_t> cpair = thesoup[i];
                         thesoup.push_back(std::make_pair(-cpair.second - 1, -cpair.first - 1));
                     }
                 }
@@ -139,63 +139,63 @@ ptvec _hashsoup(std::string instring, std::string sym) {
         if ((sym == "D2_+1") || (sym == "D4_+1") || (sym == "D4_+2")) {
             souplength = thesoup.size();
             for (i = 0; i < souplength; i++) {
-                std::pair<uint32_t, uint32_t> cpair = thesoup[i];
+                std::pair<int32_t, int32_t> cpair = thesoup[i];
                 thesoup.push_back(std::make_pair(cpair.first, -cpair.second));
             }
         }
         else if ((sym == "D2_+2") || (sym == "D4_+4")) {
             souplength = thesoup.size();
             for (i = 0; i < souplength; i++) {
-                std::pair<uint32_t, uint32_t> cpair = thesoup[i];
+                std::pair<int32_t, int32_t> cpair = thesoup[i];
                 thesoup.push_back(std::make_pair(cpair.first, -cpair.second-1));
             }
         }
         if (sym == "D4_+1") {
             souplength = thesoup.size();
             for (i = 0; i < souplength; i++) {
-                std::pair<uint32_t, uint32_t> cpair = thesoup[i];
+                std::pair<int32_t, int32_t> cpair = thesoup[i];
                 thesoup.push_back(std::make_pair(-cpair.first, cpair.second));
             }
         }
         else if ((sym == "D4_+2") || (sym == "D4_+4")) {
             souplength = thesoup.size();
             for (i = 0; i < souplength; i++) {
-                std::pair<uint32_t, uint32_t> cpair = thesoup[i];
+                std::pair<int32_t, int32_t> cpair = thesoup[i];
                 thesoup.push_back(std::make_pair(-cpair.first-1, cpair.second));
             }
         }
         if ((sym == "C2_1") || (sym == "C4_1") || (sym == "D8_1")) {
             souplength = thesoup.size();
             for (i = 0; i < souplength; i++) {
-                std::pair<uint32_t, uint32_t> cpair = thesoup[i];
+                std::pair<int32_t, int32_t> cpair = thesoup[i];
                 thesoup.push_back(std::make_pair(-cpair.first, -cpair.second));
             }
         }
         else if ((sym == "C2_2")) {
             souplength = thesoup.size();
             for (i = 0; i < souplength; i++) {
-                std::pair<uint32_t, uint32_t> cpair = thesoup[i];
+                std::pair<int32_t, int32_t> cpair = thesoup[i];
                 thesoup.push_back(std::make_pair(-cpair.first, -cpair.second-1));
             }
         }
         else if ((sym == "C2_2") || (sym == "C4_4") || (sym == "D8_4")) {
             souplength = thesoup.size();
             for (i = 0; i < souplength; i++) {
-                std::pair<uint32_t, uint32_t> cpair = thesoup[i];
+                std::pair<int32_t, int32_t> cpair = thesoup[i];
                 thesoup.push_back(std::make_pair(-cpair.first-1, -cpair.second-1));
             }
         }
         if ((sym == "C4_1") || (sym == "D8_1")) {
             souplength = thesoup.size();
             for (i = 0; i < souplength; i++) {
-                std::pair<uint32_t, uint32_t> cpair = thesoup[i];
+                std::pair<int32_t, int32_t> cpair = thesoup[i];
                 thesoup.push_back(std::make_pair(cpair.second, -cpair.first));
             }
         }
         else if ((sym == "C4_4") || (sym == "D8_4")) {
             souplength = thesoup.size();
             for (i = 0; i < souplength; i++) {
-                std::pair<uint32_t, uint32_t> cpair = thesoup[i];
+                std::pair<int32_t, int32_t> cpair = thesoup[i];
                 thesoup.push_back(std::make_pair(cpair.second, -cpair.first-1));
             }
         }
