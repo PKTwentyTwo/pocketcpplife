@@ -207,6 +207,14 @@ Will throw an error if aperiodic.'''
         '''Gets the displacement of a pattern - (0, 0) if aperiodic.'''
         disp = self.lib('GetDisplacement', self.ptr, [0, 0])
         return (disp[0], disp[1])
+    def write_svg(self, filename, width=400, height=400, gens=None) -> int:
+        '''Writes a Scalable Vector Graphics animation of the pattern to the given file.
+If the number of generations is not specified, one full period is animated.'''
+        if gens is None:
+            length = self.lib('WriteSVG', self.ptr, filename, width, height)
+        else:
+            length = self.lib('WriteSVGGens', self.ptr, filename, width, height, gens)
+        return length
     def __del__(self):
         #Delete the C++ object:
         if hasattr(self, 'lib'):

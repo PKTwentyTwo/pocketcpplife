@@ -1,12 +1,14 @@
 // Header storing the main Pattern class.
 #pragma once
 #include <cstdint>
+#include <ostream>
 #include <string>
 #include <utility>
 #include <vector>
 #include "includes/advance.hpp"
 #include "includes/gridops.hpp"
 #include "includes/hashsoup.hpp"
+#include "includes/svg.hpp"
 class Pattern {
     ptvec lifevector;
     public:
@@ -168,7 +170,32 @@ class Pattern {
     bool operator!=(Pattern& other) {
         return (!(*this == other));
     }
+    size_t write_svg(std::ostream& outstream, const int width, const int height, const int period) {
+        std::string graphic;
+        if ((period <= 1) || (period > SVG_MAX)) {
+            graphic = svg_still(lifevector, width, height);
+        }
+        else {
+            graphic = svg_osc(lifevector, width, height, period);
+        }
+        outstream << graphic;
+        return graphic.length();
+    }
+    size_t write_svg(std::ostream& outstream, const int width, const int height) {
+        std::string code = this->apgcode();
+        if (code[0] != 'x') {
+            return this->write_svg(outstream, width, height, 1);
+        }
+        if (code[1] == 'q') {
+            std::pair<int32_t, int32_t> disp = this->displacement();
+            std::string graphic = svg_ship(lifevector, width, height, this->period(), disp.first, disp.second);
+            outstream << graphic;
+            return graphic.length();
+        }
+        return this->write_svg(outstream, width, height, this->period());
+    }
 };
+    
 
 Pattern hashsoup(std::string instring, std::string sym) {
     ptvec soup = _hashsoup(instring, sym);

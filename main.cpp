@@ -1,5 +1,6 @@
 #include "pattern.hpp"
 #include <cstring>
+#include <fstream>
 extern "C" {
 void* NewPattern(const char* rle) {
     Pattern* pt = new Pattern(rle);
@@ -101,6 +102,26 @@ void GetPatternRect(void* ptr, int32_t* buffer) {
         buffer[i] = rect[i];
     }
     free(rect);
+}
+uint64_t WriteSVG(void* ptr, const char* filename, const int width, const int height) {
+    Pattern* pt = reinterpret_cast<Pattern*>(ptr);
+    std::ofstream outfile(filename);
+    if (!outfile.is_open()) {
+        return 0;
+    }
+    uint64_t outlen = pt->write_svg(outfile, width, height);
+    outfile.close();
+    return outlen;
+}
+uint64_t WriteSVGGens(void* ptr, const char* filename, const int width, const int height, const int generations) {
+    Pattern* pt = reinterpret_cast<Pattern*>(ptr);
+    std::ofstream outfile(filename);
+    if (!outfile.is_open()) {
+        return 0;
+    }
+    uint64_t outlen = pt->write_svg(outfile, width, height, generations);
+    outfile.close();
+    return outlen;
 }
 void* PatternHashsoup(const char* instring, const char* symmetry) {
     Pattern* pt = new Pattern(hashsoup(instring, symmetry));

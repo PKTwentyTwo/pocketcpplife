@@ -32,6 +32,9 @@ $6b2obobob2o$6bo2bobo2bo$7b2o3b2o!
         self.assertEqual(pt.apgcode, 'xq16_gcbgzvgg826frc')
         self.assertEqual(pt.period, 16)
         self.assertEqual(pt.displacement, (8, 0))
+        #SVG test:
+        pt.write_svg('test.svg', 400, 400)
+        self.assertTrue(os.path.exists('test.svg'))
     def test_advance(self):
         #Lidka as a test and benchmark:
         pt = Pattern('''x = 9, y = 15, rule = B3/S23
@@ -70,7 +73,6 @@ b2o$3o$2obo$b3o$2bo!
         #Download the synthesis for a block, since it will never change:
         synth = download_synthesis('xs4_33')
         self.assertTrue(synth.population == 10)
-        
         
 if __name__ == '__main__':
     unittest.main()
