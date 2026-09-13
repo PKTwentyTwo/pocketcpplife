@@ -1,14 +1,14 @@
+// This file defines functions made available via Python bindings.
 #include "pattern.hpp"
-#include <cstring>
 #include <fstream>
 extern "C" {
-void* NewPattern(const char* rle) {
-    Pattern* pt = new Pattern(rle);
+void* NewPattern(const char* rle, const char* rule) {
+    Pattern* pt = new Pattern(rle, rule);
     return reinterpret_cast<void*>(pt);
 }
 void* CopyPattern(void* ptr) {
     Pattern* pt = reinterpret_cast<Pattern*>(ptr);
-    Pattern* pt2 = new Pattern(pt->coords());
+    Pattern* pt2 = new Pattern(pt);
     return reinterpret_cast<void*>(pt2);
 }
 uint64_t GetPopulation(void* ptr) {
@@ -50,7 +50,7 @@ void* SubtractPattern(void* ptr1, void* ptr2) {
 }    
 void* AdvancePattern(void* ptr, const int32_t gens) {
     Pattern* pt = reinterpret_cast<Pattern*>(ptr);
-    Pattern* pt2 = new Pattern(pt->advance(gens).coords());
+    Pattern* pt2 = new Pattern(pt->advance(gens));
     return reinterpret_cast<void*>(pt2);
 }
 void* TranslatePattern(void* ptr, const int32_t dx, const int32_t dy) {
@@ -123,8 +123,8 @@ uint64_t WriteSVGGens(void* ptr, const char* filename, const int width, const in
     outfile.close();
     return outlen;
 }
-void* PatternHashsoup(const char* instring, const char* symmetry) {
-    Pattern* pt = new Pattern(hashsoup(instring, symmetry));
+void* PatternHashsoup(const char* rule, const char* instring, const char* symmetry) {
+    Pattern* pt = new Pattern(hashsoup(rule, instring, symmetry));
     return reinterpret_cast<void*>(pt);
 }
 void DeletePattern(void* ptr) {

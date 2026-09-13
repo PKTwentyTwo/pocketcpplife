@@ -36,7 +36,6 @@ SOFTWARE.
 
 */
 #pragma once
-#include <endian.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
@@ -59,6 +58,11 @@ void copy_be32_bytes(uint8_t* bytes, const uint32_t num) {
     bytes[2] = (uint8_t)(num >> 8);
     bytes[3] = (uint8_t)(num);
 }
+void write_be64(uint8_t* bytes, const uint64_t num) {
+    for (int i = 0; i < 8; i++) {
+        bytes[i] = (uint8_t)(num >> ((7-i) * 8));
+    }
+}
 // Main internal function:
 uint8_t* _hash_bytes(const void* start, const size_t bytes) {
     // Initialise hash values:
@@ -79,7 +83,7 @@ uint8_t* _hash_bytes(const void* start, const size_t bytes) {
     
     //Find a value for K and L:
     const unsigned short K = 512 - ((bitlength + 1 + 64) % 512);
-    const uint64_t L = htobe64(bitlength);
+    const uint64_t L = bitlength;
 
     // Work out the new input sizes:
     const size_t totalinputlength = bitlength + 65 + K;
@@ -98,8 +102,7 @@ uint8_t* _hash_bytes(const void* start, const size_t bytes) {
     }
 
     // Finally, add the length of the original message as a 64-bit integer (copy 8 bytes):
-    memcpy(newinputarray + inputbytes - 8, &L, 8);
-    
+    write_be64(newinputarray + inputbytes - 8, L);
     // Split into 512-bit chunks:
     const size_t numchunks = totalinputlength / 512;
 

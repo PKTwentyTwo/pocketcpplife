@@ -8,21 +8,6 @@ The SHA-256 implementation used, sha256.h, is written by me and not third-party.
 #include <vector>
 #include "gridops.hpp"
 #include "sha256.h"
-// Stringy stuff:
-const std::string uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-const std::string lowercase = "abcdefghijklmnopqrstuvwxyz";
-std::string tolower(const std::string instring) {
-    int i;
-    std::string outstring = instring;
-    for (i = 0; i < 26; i++) {
-        std::string char1 = "";
-        std::string char2 = "";
-        char1 += uppercase[i];
-        char2 += lowercase[i];
-        outstring = replace(outstring, char1, char2);
-    }
-    return outstring;
-}
 // Filter out duplicate coordinates:
 ptvec filtersoup(const ptvec thesoup) {
     std::set<std::pair<int32_t, int32_t> > coordset;
@@ -38,9 +23,9 @@ ptvec filtersoup(const ptvec thesoup) {
 }
 // This function is a C++ translation of a Python 3 translation of a Python 2 function.
 // There may be a few problems.
-ptvec _hashsoup(std::string instring, std::string sym) {
-    std::string lsym = tolower(sym);
-    bool is_stdin = (lsym.find("stdin") != std::string::npos);
+ptvec _hashsoup(const std::string instring, std::string sym) {
+    const std::string lsym = tolower(sym);
+    const bool is_stdin = (lsym.find("stdin") != std::string::npos);
     if (sym.length() < 2) {
         ptvec empty;
         return empty;
@@ -201,7 +186,7 @@ ptvec _hashsoup(std::string instring, std::string sym) {
         }
         return filtersoup(thesoup);
     }
-    size_t first_dash = instring.find("-");
+    const size_t first_dash = instring.find("-");
     if (first_dash == std::string::npos) {
         ptvec empty;
         return empty;

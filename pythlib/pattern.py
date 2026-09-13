@@ -5,13 +5,12 @@ import urllib.request
 from collections import defaultdict
 from .compiler import compilelibrary, libdir, rootdir
 from ..config import canoniserule
-def find_lib(rule):
-    '''Returns the library needed for a given rule.'''
-    rule = canoniserule(rule)
-    target = libdir + '/' + rule + '.so'
+def find_lib():
+    '''Returns a compiled library.'''
+    target = libdir + '/' + 'main.so'
     if os.path.isfile(target):
         return target
-    compilelibrary(rule)
+    compilelibrary()
     return target
 restype_dict = {'void*': c_void_p, 'uint64_t': c_uint64, 'uint32_t': c_uint32, 'int64_t': c_int64, 'int32_t': c_int32, 'bool': c_bool, 'char*': c_char_p, 'void': None}
 def load_restypes():
@@ -91,6 +90,7 @@ class WrappedLib:
             length = int(ret[1:])
             return self(fname, [length], length)
         return ret
+main_library = WrappedLib(find_lib())
 class PtStruct:
     '''Wrapper class used to avoid extra calls.'''
     def __init__(self, rule, ptr):
@@ -100,20 +100,16 @@ class Pattern:
     '''Main Pattern class.'''
     def __init__(self, rle = '', rule = 'b3s23'):
         self.rule = canoniserule(rule)
-        if self.rule not in libraries:
-            libraries[self.rule] = WrappedLib(find_lib(self.rule))
-        self.lib = libraries[self.rule]
+        self.lib = main_library
         #Actually initialise the pattern:
         if isinstance(rle, str):
-            self.ptr = self.lib('NewPattern', rle)
+            self.ptr = self.lib('NewPattern', rle, rule)
         elif isinstance(rle, Pattern):
             self.ptr = self.lib('CopyPattern', rle.ptr)
             self.rule = rle.rule
-            self.lib = libraries[self.rule]
         elif isinstance(rle, PtStruct):
             self.ptr = rle.ptr
             self.rule = rle.rule
-            self.lib = libraries[self.rule]
         else:
             raise TypeError('Unable to initialise Pattern with argument of type '+str(type(rle))[7:-1])       
     #Most of the below functions are just C++ wrappers.
@@ -227,11 +223,8 @@ If the number of generations is not specified, one full period is animated.'''
 #Soup related functions that don't really fit as class methods:
 def hashsoup(rule = 'b3s23', instring = 'test', sym = 'C1'):
     '''Generates a soup based on an SHA-256 hash of the instring.'''
-    rule = canoniserule(rule)
-    if rule not in libraries:
-        libraries[rule] = WrappedLib(find_lib(rule))
-    lib = libraries[rule]
-    ptr = lib('PatternHashsoup', instring, sym)
+    lib = main_library
+    ptr = lib('PatternHashsoup', rule, instring, sym)
     pts = PtStruct(rule, ptr)
     pt = Pattern(pts, rule)
     return pt

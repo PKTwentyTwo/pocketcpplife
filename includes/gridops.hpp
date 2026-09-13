@@ -11,15 +11,6 @@ typedef std::vector<std::pair<int32_t, int32_t> > ptvec;
 const std::vector<std::string> orientations = {"identity", "rot90", "rot180", "rot270", "flip_x", "flip_y", "swap_xy", "swap_xy_flip"};
 const char characters[37] = "0123456789abcdefghijklmnopqrstuvwxyz";
 std::string characterstring(characters);
-std::string replace(const std::string string1, const std::string target, const std::string replacement) {
-    std::string newstring(string1);
-    int32_t pos = newstring.find(target);
-    while (pos != newstring.npos) {
-        newstring.replace(pos, target.size(), replacement);
-        pos = newstring.find(target, pos + replacement.size());
-    }
-    return newstring;
-}
 ptvec rle_to_vector(const std::string rle) {
     // Converts an RLE to a grid.
     int32_t x = 0;
@@ -136,8 +127,13 @@ int32_t* getgridrect(const ptvec& ptvector) {
     bbox[3] = maxy - miny + 1;
     return bbox;
 }
+std::string slashrule(const std::string rule) {
+    std::string rule2 = replace(rule2, "b", "B");
+    rule2 = replace(rule2, "s", "/S");
+    return rule2;
+}
 // Converts a vector of coordinates to the Run Length Encoding format (RLE):
-std::string vector_to_RLE(const ptvec& ptvector) {
+std::string vector_to_RLE(const ptvec& ptvector, const std::string slashedrule) {
     int32_t* bbox = getgridrect(ptvector);
     const int32_t x = *bbox;
     const int32_t dx = *(bbox + 2);
@@ -461,7 +457,7 @@ std::string compareapgcode(const std::string apgcode1, const std::string apgcode
     }
     return apgcode2;
 }
-std::string getapgcodesuffix(const ptvec& grid, const int32_t period) {
+std::string getapgcodesuffix(const ptvec& grid, const int32_t period, const std::string rule) {
     bool apgcodeknown = false;
     std::string bestapgcode = "";
     int32_t i, j;
@@ -478,7 +474,7 @@ std::string getapgcodesuffix(const ptvec& grid, const int32_t period) {
                 bestapgcode = compareapgcode(bestapgcode, gridapgcode);
             }
         }
-        cppadvance(cgrid, 1);
+        cppadvance(cgrid, 1, rule);
     }
     if (bestapgcode.length() == 0) {
         bestapgcode = "0";

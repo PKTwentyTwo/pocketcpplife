@@ -61,7 +61,7 @@ std::string svg_still(const ptvec& ptvector, const int width, const int height) 
     return graphic;
 }
 // Generate SVG for an oscillator:
-std::string svg_osc(const ptvec& ptvector, const int width, const int height, const int period) {
+std::string svg_osc(const ptvec& ptvector, const std::string rule, const int width, const int height, const int period) {
     // Return still image if period out of range:
     if ((period > SVG_MAX) || (period < 1) || (ptvector.size() == 0)) {
         return svg_still(ptvector, width, height);
@@ -103,7 +103,7 @@ std::string svg_osc(const ptvec& ptvector, const int width, const int height, co
             int64_t key = tokey(j.first, j.second);
             cellvalues[key][i] = 1;
         }
-        cppadvance(ptvector2, 1);
+        cppadvance(ptvector2, 1, rule);
     }
     // Calculate the effective bounding box:
     int32_t bbox[4];
@@ -177,7 +177,7 @@ std::string svg_osc(const ptvec& ptvector, const int width, const int height, co
     return graphic;
 }
 // Generate SVG for a spaceship:
-std::string svg_ship(const ptvec& ptvector, const int width, const int height, const int period, const int32_t pattern_dx, const int32_t pattern_dy) {
+std::string svg_ship(const ptvec& ptvector, const std::string rule, const int width, const int height, const int period, const int32_t pattern_dx, const int32_t pattern_dy) {
     // Return still image if period out of range:
     if ((period > SVG_MAX) || (period < 1) || (ptvector.size() == 0)) {
         return svg_still(ptvector, width, height);
@@ -219,7 +219,7 @@ std::string svg_ship(const ptvec& ptvector, const int width, const int height, c
             int64_t key = tokey(j.first, j.second);
             cellvalues[key][i] = 1;
         }
-        cppadvance(ptvector2, 1);
+        cppadvance(ptvector2, 1, rule);
     }
     // Calculate the effective bounding box:
     int32_t bbox[4];

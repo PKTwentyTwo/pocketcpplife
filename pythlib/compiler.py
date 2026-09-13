@@ -5,11 +5,9 @@ import sys
 import time
 if os.name == 'nt':
     from .mingw64 import get_mingw_compiler
-from ..config import configparams, isvalid
+from ..config import isvalid
 rootdir = os.path.dirname(os.path.dirname(__file__))
-libdir = os.path.dirname(__file__) + '/lib'
-if not os.path.isdir(libdir):
-    os.mkdir(libdir)
+libdir = rootdir
 def getcompiler():
     '''Determines if it is feasible to compile in the current working environment.
 Throws an error if compilation is not possible, and otherwise returns the compiler.'''
@@ -31,16 +29,12 @@ Try installing it with: one of the following:
 1. sudo apt install g++
 2. sudo apt install clang''')
     return compiler
-def compilelibrary(rule, compilerargs = ['-std=c++17', '-O3', '-Os', '-Ofast']):
+def compilelibrary(compilerargs = ['-std=c++17', '-O3', '-Os', '-Ofast']):
     '''Compiles a shared library for the given rule.'''
-    if not isvalid(rule):
-        raise ValueError('Rule '+str(rule)+' is not recognised as a non-B0 isotropic 2-state Moore rule.')
-    #Edit the parameters header file:
-    configparams(rule)
     #Preparations for compilation:
     compiler = getcompiler()
     infile = rootdir + '/main.cpp'
-    outfile = libdir + '/' + rule + '.so'
+    outfile = libdir + '/' + 'main.so'
     forcedflags = [infile, '-o', outfile, '-fPIC', '-shared']
     if os.name == 'nt':
         #Required to avoid DLL hell:

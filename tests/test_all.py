@@ -8,6 +8,7 @@ import unittest
 class TestPatternMethods(unittest.TestCase):
 
     def test_creation(self):
+        print('Testing creation...')
         #Using my PFP as a test; initialise patterns by RLE and apgcode, then check that they are equal:
         pt = Pattern('''x = 21, y = 21, rule = B3/S23
 7b2o3b2o$6bo2bobo2bo$6b2obobob2o$9bobo$6b2obobob2o$7bobobobo$b2obo2bo
@@ -25,6 +26,7 @@ $6b2obobob2o$6bo2bobo2bo$7b2o3b2o!
         pt4 = Pattern(pt2)
         self.assertEqual(pt2, pt4)
     def test_period(self):
+        print('Testing period...')
         #Using the Coe ship as a test:
         pt = Pattern('''x = 10, y = 9, rule = B3/S23
 4b6o$2b2o5bo$2obo5bo$4bo3bo$6bo$6b2o$5b4o$5b2ob2o$7b2o!
@@ -33,10 +35,13 @@ $6b2obobob2o$6bo2bobo2bo$7b2o3b2o!
         self.assertEqual(pt.period, 16)
         self.assertEqual(pt.displacement, (8, 0))
         #SVG test:
+        if os.path.isfile('test.svg'):
+            os.remove('test.svg')
         pt.write_svg('test.svg', 400, 400)
         self.assertTrue(os.path.exists('test.svg'))
     def test_advance(self):
         #Lidka as a test and benchmark:
+        print('Testing advance...')
         pt = Pattern('''x = 9, y = 15, rule = B3/S23
 bo$obo$bo8$8bo$6bobo$5b2obo2$4b3o!
 ''', 'b3s23')
@@ -45,6 +50,7 @@ bo$obo$bo8$8bo$6bobo$5b2obo2$4b3o!
         self.assertEqual(evpt.population, 1625)
     def test_logic(self):
         #Test boolean pattern comparison and emptiness.
+        print('Testing comparison...')
         pt1 = Pattern('''x = 4, y = 5, rule = B3/S23
 b2o$3o$2obo$b3o$2bo!
 ''')
@@ -55,6 +61,7 @@ b2o$3o$2obo$b3o$2bo!
         pt3 = pt2 - pt2
         self.assertTrue(pt3.empty())
     def test_hashsoup(self):
+        print('Testing hashsoup...')
         #Test a soup from Travelling Ts (also serves as an OCA test):
         pt = hashsoup('b3s23-a5', 'k_NJ6K9Rkcvj662971047', 'D8_1')
         evsoup = pt[100]
@@ -66,6 +73,7 @@ b2o$3o$2obo$b3o$2bo!
         self.assertEqual(pt2.period, 120)
         self.assertEqual(pt2.apgcode, 'xp120_xsssy375777757z777')
     def test_download(self):
+        print('Testing download...')
         #Download soups for the 34P14 shuttle:
         soups = download_soups('xp14_033y133zo4maxam4oz1ppy1pp1', 'b3s23')
         soups2 = soups['D2_+1']

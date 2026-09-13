@@ -5,7 +5,7 @@
 #include <ctime>
 int main() {
     std::time_t t1 = std::time(0);
-    Pattern pt("x = 9, y = 15, rule = B3/S23\nbo$obo$bo8$8bo$6bobo$5b2obo2$4b3o!");
+    Pattern pt("x = 9, y = 15, rule = B3/S23\nbo$obo$bo8$8bo$6bobo$5b2obo2$4b3o!", "b3s23");
     std::cout << "Initial population: " << pt.population() << std::endl;
     pt = pt.advance(29055);
     std::time_t t2 = std::time(0);
