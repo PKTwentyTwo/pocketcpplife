@@ -10,10 +10,9 @@
 #include "includes/hashsoup.hpp"
 #include "includes/svg.hpp"
 class Pattern {
-    private:
+    public:
     ptvec lifevector;
     std::string rule;
-    public:
     Pattern(ptvec ptvector, std::string ptrule) {
         lifevector = ptvector;
         rule = ptrule;
@@ -35,28 +34,34 @@ class Pattern {
         lifevector = ptr->coords();
         rule = ptr->getrule();
     }
-    Pattern advance(uint32_t generations) {
+    Pattern& operator=(const Pattern& that) {
+        lifevector = that.coords();
+        rule = that.getrule();
+        return *this;
+    }
+    ~Pattern() {}
+    Pattern advance(uint32_t generations) const {
         ptvec lifevector2(lifevector);
         cppadvance(lifevector2, generations, rule);
         Pattern* newptr = new Pattern(lifevector2, rule);
         return *newptr;
     }
-    Pattern operator[](uint32_t numgens) {
+    Pattern operator[](uint32_t numgens) const {
         return advance(numgens);
     }
-    ptvec coords() {
+    ptvec coords() const {
         return lifevector;
     }
-    uint64_t population() {
+    uint64_t population() const {
         return lifevector.size();
     }
-    int32_t* getrect() {
+    int32_t* getrect() const {
         return getgridrect(lifevector);
     }
-    int64_t digest() {
+    int64_t digest() const {
         return digestvector(lifevector);
     }
-    std::string getrule() {
+    std::string getrule() const {
         return rule;
     }
     bool empty() {
@@ -65,18 +70,18 @@ class Pattern {
     bool nonempty() {
         return (lifevector.size() != 0);
     }
-    std::string getrle() {
+    std::string getrle() const {
         return vector_to_RLE(lifevector, slashrule(rule));
     }
-    std::string rle_string() {
+    std::string rle_string() const {
         return vector_to_RLE(lifevector, slashrule(rule));
     }
-    uint32_t period() {
+    uint32_t period() const {
         uint32_t i;
         int64_t initdigest = this->digest();
         Pattern pt2 = Pattern(lifevector, rule);
         for (i = 1; i <= MAX_PERIOD; i++) {
-            pt2 = pt2.advance(1);
+            pt2 = pt2[1];
             int64_t newdigest = pt2.digest();
             if (newdigest == initdigest) {
                 return i;
@@ -84,9 +89,9 @@ class Pattern {
         }
         return 0;
     }
-    std::pair<int32_t, int32_t> displacement() {
+    std::pair<int32_t, int32_t> displacement() const {
         uint32_t ptperiod = this->period();
-        if (ptperiod == -1) {
+        if (ptperiod == 0) {
             return std::make_pair(0, 0);
         }
         int32_t* bbox1 = this->getrect();
@@ -95,7 +100,7 @@ class Pattern {
         return std::make_pair(bbox2[0] - bbox1[0], bbox2[1] - bbox1[1]);
     }
     std::pair<int32_t, int32_t> displacement(uint32_t ptperiod) {
-        if (ptperiod == -1) {
+        if (ptperiod == 0) {
             return std::make_pair(0, 0);
         }
         int32_t* bbox1 = this->getrect();
@@ -157,8 +162,7 @@ class Pattern {
     }
     std::string apgcode() {
         uint32_t ptperiod = this->period();
-        int32_t i, j;
-        if (ptperiod == -1) {
+        if (ptperiod == 0) {
             return "aperiodic";
         }
         std::string suffix = getapgcodesuffix(lifevector, ptperiod, rule);
@@ -207,8 +211,6 @@ class Pattern {
         return this->write_svg(outstream, width, height, this->period());
     }
 };
-    
-
 Pattern hashsoup(const std::string rule, const std::string instring, std::string sym) {
     ptvec soup = _hashsoup(instring, sym);
     return Pattern(soup, rule);

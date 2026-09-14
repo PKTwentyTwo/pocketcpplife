@@ -40,7 +40,7 @@ void parserule(const std::string rulestring, std::vector<std::string>& condition
     std::string cstring = "";
     bool birth = 1;
     rule += "|";
-    int i, j;
+    size_t i, j;
     for (i = 0; i < rule.length(); i++) {
         char character = rule[i];
         if ((digits.find(character) != digits.npos) || (signalchars.find(character) != signalchars.npos)) {
@@ -117,7 +117,7 @@ void get9bit(const std::string condition, std::vector<int>& conditions) {
     if (condition[0] == 'S') {
         std::vector<int> conditions2;
         get9bit(replace(condition, "S", "B"), conditions2);
-        int i;
+        size_t i;
         for (i = 0; i < conditions2.size(); i++) {
             conditions.push_back(conditions2[i] + 16);
         }
@@ -279,15 +279,14 @@ void get9bit(const std::string condition, std::vector<int>& conditions) {
 }
 void createconditions(const std::string rulestring, umap<std::string, bool*>* rulemap) {
     bool* conditionarr = (bool*)malloc(512);
-    int i, j;
     memset(conditionarr, 0, 512);
     std::vector<std::string> conditions;
     parserule(rulestring, conditions);
     std::vector<int> intvec;
     intvec.reserve(9);
-    for (auto i : conditions) {
+    for (std::string i : conditions) {
         get9bit(i, intvec);
-        for (auto j : intvec) {
+        for (int j : intvec) {
             conditionarr[j] = 1;
         }
         intvec.clear();

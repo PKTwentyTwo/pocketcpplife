@@ -63,7 +63,7 @@ void* TransformPattern(void* ptr, const char* transformation) {
     Pattern* pt2 = new Pattern(pt->transform(transformation));
     return reinterpret_cast<void*>(pt2);
 }
-void GetPatternRLE(void* ptr, char* buffer, const int buflen) {
+void GetPatternRLE(void* ptr, char* buffer, const size_t buflen) {
     Pattern* pt = reinterpret_cast<Pattern*>(ptr);
     std::string rle = pt->rle_string();
     if (rle.length() < buflen) {
@@ -76,7 +76,7 @@ void GetPatternRLE(void* ptr, char* buffer, const int buflen) {
         memcpy(buffer, cerrormsg, strlen(cerrormsg));
     }
 }
-void GetPatternApgcode(void* ptr, char* buffer, const int buflen) {
+void GetPatternApgcode(void* ptr, char* buffer, const size_t buflen) {
     Pattern* pt = reinterpret_cast<Pattern*>(ptr);
     std::string apgcode = pt->apgcode();
     if (apgcode.length() < buflen) {
@@ -89,6 +89,17 @@ void GetPatternApgcode(void* ptr, char* buffer, const int buflen) {
         memcpy(buffer, cerrormsg, strlen(cerrormsg));
     }
 }
+void GetPatternCoords(void* ptr, int32_t* buffer) {
+    Pattern* pt = reinterpret_cast<Pattern*>(ptr);
+    ptvec coords = pt->coords();
+    size_t i;
+    const size_t pop = pt->population();
+    for (i = 0; i < pop; i++)  {
+        std::pair<int32_t, int32_t> coord = coords[i];
+        buffer[2 * i] = coord.first;
+        buffer[2 * i + 1] = coord.second;
+    }
+}
 void GetDisplacement(void* ptr, int32_t* buffer) {
     Pattern* pt = reinterpret_cast<Pattern*>(ptr);
     std::pair<int32_t, int32_t> disp = pt->displacement();
@@ -98,9 +109,7 @@ void GetDisplacement(void* ptr, int32_t* buffer) {
 void GetPatternRect(void* ptr, int32_t* buffer) {
     Pattern* pt = reinterpret_cast<Pattern*>(ptr);
     int32_t* rect = pt->getrect();
-    for (int i = 0; i < 4; i++) {
-        buffer[i] = rect[i];
-    }
+    memcpy(buffer, rect, 4 * sizeof(int32_t));
     free(rect);
 }
 uint64_t WriteSVG(void* ptr, const char* filename, const int width, const int height) {

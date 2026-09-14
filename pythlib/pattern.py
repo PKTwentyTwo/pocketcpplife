@@ -148,7 +148,7 @@ class Pattern:
         if len(args) == 1:
             return self.transform(args[0])
         if len(args) == 2:
-            return self.transform(*args)
+            return self.translate(*args)
         raise TypeError("Usage: pt(dx, dy) or pt('rot90')")
     def digest(self) -> int:
         '''Calculates a position-independent orientation-dependent digest of the pattern.'''
@@ -178,6 +178,18 @@ class Pattern:
         rect = self.lib('GetPatternRect', self.ptr, [0, 0, 0, 0])
         print(rect)
         return [rect[x] for x in range(4)]
+    def coords(self) -> list:
+        '''Returns every cell in the pattern as a list of tuples.'''
+        if self.empty():
+            return []
+        pop = self.population
+        buf1 = [0] * (pop * 2)
+        buf2 = (c_int32 * (pop * 2))(*buf1)
+        self.lib('GetPatternCoords', self.ptr, buf2)
+        outcoords = []
+        for x in range(pop):
+            outcoords.append((buf2[2*x], buf2[2*x+1]))
+        return outcoords
     @property
     def bbox(self) -> list:
         '''Gets the bounding box of the pattern in the form [x, y, dx, dy].'''

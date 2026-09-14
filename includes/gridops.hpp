@@ -2,6 +2,7 @@
 #pragma once
 #include <algorithm>
 #include <cstdint>
+#include <set>
 #include <string>
 #include <utility>
 #include <vector>
@@ -16,7 +17,7 @@ ptvec rle_to_vector(const std::string rle) {
     int32_t x = 0;
     int32_t y = 0;
     ptvec outvector;
-    int32_t position = 0;
+    size_t position = 0;
     std::string cstring = "";
     bool isnum = false;
     uint8_t asciipos = 0;
@@ -94,7 +95,7 @@ ptvec rle_to_vector(const std::string rle) {
 }
 int32_t* getgridrect(const ptvec& ptvector) {
     int32_t* bbox = (int32_t*)malloc(4 * sizeof(int32_t));
-    uint32_t i;
+    size_t i;
     for (i = 0; i < 4; i++) {
         bbox[i] = 0;
     }
@@ -107,7 +108,8 @@ int32_t* getgridrect(const ptvec& ptvector) {
     int32_t maxy = miny;
     int32_t x, y;
     for (i = 1; i < ptvector.size(); i++) {
-        auto [x, y] = ptvector[i];
+        std::pair<int32_t, int32_t> coord  = ptvector[i];
+        x = coord.first; y = coord.second;
         if (x > maxx) {
             maxx = x;
         }
@@ -128,7 +130,7 @@ int32_t* getgridrect(const ptvec& ptvector) {
     return bbox;
 }
 std::string slashrule(const std::string rule) {
-    std::string rule2 = replace(rule2, "b", "B");
+    std::string rule2 = replace(rule, "b", "B");
     rule2 = replace(rule2, "s", "/S");
     return rule2;
 }
@@ -141,9 +143,10 @@ std::string vector_to_RLE(const ptvec& ptvector, const std::string slashedrule) 
     std::string rle = "x = " + std::to_string(dx) + ", y = " + std::to_string(dy)  + ", rule = " + slashedrule + "\n";
     umap<int32_t, std::vector<int32_t> > rows;
     int32_t cx, cy;
-    uint32_t i, j;
+    size_t i, j;
     for (i = 0; i < ptvector.size(); i++) {
-        auto [cx, cy] = ptvector[i];
+        std::pair<int32_t, int32_t> coord = ptvector[i];;
+        cx = coord.first; cy = coord.second;
         if (rows.count(cy) == 0) {
             rows[cy] = {};
         }
@@ -217,9 +220,10 @@ std::string vector_to_RLE(const ptvec& ptvector, const std::string slashedrule) 
 // Translates every cell in a grid by the (regular maths) vector (dx, dy):
 ptvec translategrid(const ptvec& ptvector, const int32_t dx, const int32_t dy) {
     ptvec newvec;
-    int32_t i;
+    size_t i;
     for (i = 0; i < ptvector.size(); i++) {
-        auto [x, y] = ptvector[i];
+        std::pair<int32_t, int32_t> coord = ptvector[i];;
+        int32_t x = coord.first; int32_t y = coord.second;
         newvec.push_back(std::make_pair(x + dx, y + dy));
     }
     return newvec;
@@ -229,8 +233,7 @@ ptvec transformgrid(const ptvec& ptvector, const std::string transformation) {
     // (I'm not exactly a fan of coordinate geometry, but at least I can avoid matrices here).
     ptvec newvec;
     newvec.reserve(ptvector.size());
-    int32_t i;
-    int32_t x, y;
+    size_t i;
     if (transformation == "identity") {
         for (i = 0; i < ptvector.size(); i++) {
             auto [x, y] = ptvector[i];
@@ -291,7 +294,6 @@ ptvec transformgrid(const ptvec& ptvector, const std::string transformation) {
 std::pair<int32_t, int32_t> getfirstcell(const ptvec& ptvector) {
     int32_t* bbox = getgridrect(ptvector);
     int32_t y = bbox[1];
-    int32_t i;
     int32_t minx = bbox[0] + bbox[2];
     for (auto i : ptvector) {
         if (i.second == y) {
@@ -329,7 +331,6 @@ ptvec applyADD(const ptvec& vector1, const ptvec& vector2) {
     umap<int64_t,bool> trackermap;
     newvector.reserve(vector1.size() + vector2.size());
     trackermap.reserve(vector1.size() + vector2.size());
-    int32_t i;
     int64_t digest;
     for (auto i : vector1) {
         digest = hashpair(i);
@@ -355,7 +356,6 @@ ptvec applyAND(const ptvec& vector1, const ptvec& vector2) {
     }
     newvector.reserve(maxsize);
     trackermap.reserve(vector1.size() + vector2.size());
-    int32_t i;
     int64_t digest;
     for (auto i : vector1) {
         digest = hashpair(i);
@@ -374,7 +374,6 @@ ptvec applySUB(const ptvec& vector1, const ptvec& vector2) {
     umap<int64_t,bool> trackermap;
     newvector.reserve(vector1.size());
     trackermap.reserve(vector1.size() + vector2.size());
-    int32_t i;
     int64_t digest;
     for (auto i : vector1) {
         digest = hashpair(i);
@@ -460,7 +459,7 @@ std::string compareapgcode(const std::string apgcode1, const std::string apgcode
 std::string getapgcodesuffix(const ptvec& grid, const int32_t period, const std::string rule) {
     bool apgcodeknown = false;
     std::string bestapgcode = "";
-    int32_t i, j;
+    int32_t i;
     ptvec cgrid(grid);
     for (i = 0; i < period; i++) {
         for (auto j : orientations) {
@@ -484,14 +483,15 @@ std::string getapgcodesuffix(const ptvec& grid, const int32_t period, const std:
 ptvec apgcodetogrid(const std::string apgcode) {
     int32_t xpos = 0;
     int32_t ypos = 0;
-    int32_t readpos = 0;
-    int32_t value = 0;
+    size_t readpos = 0;
+    size_t value = 0;
     ptvec newvector;
     int32_t i, j;
+    size_t k;
     std::string apgcode2, cstring;
     int32_t underscorepos = apgcode.find("_");
-    for (i = underscorepos+1; i < apgcode.length(); i++) {
-        apgcode2 += apgcode[i];
+    for (k = underscorepos+1; k < apgcode.length(); k++) {
+        apgcode2 += apgcode[k];
     }
     for (i = 35; i > -1; i--) {
         std::string ystring = "y";
@@ -513,7 +513,7 @@ ptvec apgcodetogrid(const std::string apgcode) {
             ptvec fakevector;
             return fakevector;
         }
-        if ((value >= 0) & (value < 32)) {
+        if (value < 32) {
             for (i = 0; i < 5; i++) {
                 if ((value / (1 << i))%2) {
                     newvector.push_back(std::make_pair(xpos, ypos + i));
@@ -575,4 +575,38 @@ bool isapgcode(const std::string apgcode) {
         return 1;
     }
     return 0;
+}
+std::vector<ptvec> getcomponents(const ptvec& grid) {
+    umap<int64_t, bool> processed;
+    processed.reserve(9 * grid.size());
+    std::set<int64_t> cellset;
+    for (auto i : grid) {
+        cellset.insert(tokey(i.first, i.second));
+    }
+    std::vector<ptvec> components;
+    while (cellset.size() > 0) {
+        ptvec ptvector = {};
+        int64_t first = *cellset.begin();
+        int32_t x = getx(first);
+        int32_t y = gety(first);
+        cellset.erase(first);
+        processed[first] = true;
+        ptvector.push_back(std::make_pair(x, y));
+        for (int i = -1;  i < 2; i++) {
+            for (int j = -1; j < 2; j++) {
+                if ((i  != 0) || (j != 0)) {
+                    int64_t key2 = tokey(x + i, y + j);
+                    if (!processed[key2]) {
+                        processed[key2] = true;
+                        if (cellset.find(key2) != cellset.end()) {
+                            cellset.erase(key2);
+                            ptvector.push_back(std::make_pair(x+i,y+j));
+                        }
+                    }
+                }
+            }
+        }
+        components.push_back(ptvector);
+    }
+    return components;
 }

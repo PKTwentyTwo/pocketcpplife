@@ -23,7 +23,7 @@ std::string svg_still(const ptvec& ptvector, const int width, const int height) 
     const ptvec ptvector2 = defaultshiftgrid(ptvector);
     // Pattern bounding box:
     int32_t* bbox = getgridrect(ptvector2);
-    const int x = bbox[0]; const int y = bbox[1]; const int dx = bbox[2]; const int dy = bbox[3];
+    const int dx = bbox[2]; const int dy = bbox[3];
 
     int cell_size = 8;
     int real_cell_size = cell_size - 1;
@@ -40,7 +40,6 @@ std::string svg_still(const ptvec& ptvector, const int width, const int height) 
     graphic += std::to_string(height) + "\"";
     graphic += " width=\"" + std::to_string(width) + "px\" ";
     graphic += " height=\"" + std::to_string(height) + "px\">";
-    int i;
     // Iterate over each cell and add a rect:
     for (auto i : ptvector) {
         std::string current_rect = "<rect width=\"";
@@ -67,7 +66,7 @@ std::string svg_osc(const ptvec& ptvector, const std::string rule, const int wid
         return svg_still(ptvector, width, height);
     }
     // Stores [x, y, max_x, max_y] instead of [x, y, dx, dy]:
-    int32_t bbox_max[4];
+    int32_t bbox_max[4] = {0, 0, 0, 0};
     ptvec ptvector2 = ptvector;
     umap<int64_t, std::bitset<SVG_MAX>> cellvalues;
     int i, j;
@@ -183,7 +182,7 @@ std::string svg_ship(const ptvec& ptvector, const std::string rule, const int wi
         return svg_still(ptvector, width, height);
     }
     // Stores [x, y, max_x, max_y] instead of [x, y, dx, dy]:
-    int32_t bbox_max[4];
+    int32_t bbox_max[4] = {0, 0, 0, 0};
     ptvec ptvector2 = ptvector;
     umap<int64_t, std::bitset<SVG_MAX>> cellvalues;
     int i, j;

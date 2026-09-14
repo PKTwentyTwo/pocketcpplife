@@ -31,7 +31,8 @@ void advanceone(std::vector<std::pair<int32_t, int32_t> >& lifevector, const boo
     // Calculating neighbours:
     const size_t vsize = lifevector.size();
     for (i = 0; i < (vsize); i++) {
-        auto [x, y] = lifevector[i];
+        std::pair<int32_t, int32_t> coord = lifevector[i];
+        x = coord.first; y = coord.second;
         for (dx = 0; dx < 3; dx++) {
             for (dy = 0; dy < 3; dy++) {
                 neighbours[tokey(x + dx - 1, y + dy - 1)] += 1 << (3*dy + dx);

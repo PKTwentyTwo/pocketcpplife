@@ -21,8 +21,8 @@ ptvec filtersoup(const ptvec thesoup) {
     }
     return newsoup;
 }
-// This function is a C++ translation of a Python 3 translation of a Python 2 function.
-// There may be a few problems.
+/* This function is a C++ translation of a Python 3 translation of a Python 2 function.
+   There may be a few problems. */
 ptvec _hashsoup(const std::string instring, std::string sym) {
     const std::string lsym = tolower(sym);
     const bool is_stdin = (lsym.find("stdin") != std::string::npos);
@@ -50,7 +50,8 @@ ptvec _hashsoup(const std::string instring, std::string sym) {
         else {
             d = 0;
         }
-        int i, j, k;
+        size_t i;
+        int j, k;
         int32_t x, y;
         uint8_t t;
         for (j = 0; j < 32; j++) {

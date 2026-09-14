@@ -97,7 +97,7 @@ uint8_t* _hash_bytes(const void* start, const size_t bytes) {
 
     // Start with a 1, then pad with K zeroes:
     newinputarray[bytes] = 0x80;
-    for (i = 1; i <= (K - 7) / 8; i++) {
+    for (i = 1; i <= (unsigned short)((K - 7) / 8); i++) {
         newinputarray[bytes + i] = 0x00;
     }
 

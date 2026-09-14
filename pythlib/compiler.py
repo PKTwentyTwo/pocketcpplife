@@ -29,13 +29,13 @@ Try installing it with: one of the following:
 1. sudo apt install g++
 2. sudo apt install clang''')
     return compiler
-def compilelibrary(compilerargs = ['-std=c++17', '-O3', '-Os', '-Ofast']):
+def compilelibrary(compilerargs = ['-std=c++17', '-O3', '-Os', '-Ofast', '-flto']):
     '''Compiles a shared library for the given rule.'''
     #Preparations for compilation:
     compiler = getcompiler()
     infile = rootdir + '/main.cpp'
     outfile = libdir + '/' + 'main.so'
-    forcedflags = [infile, '-o', outfile, '-fPIC', '-shared']
+    forcedflags = [infile, '-o', outfile, '-fPIC', '-shared',  '-Wall',  '-Wextra']
     if os.name == 'nt':
         #Required to avoid DLL hell:
         #https://en.wikipedia.org/wiki/DLL_hell
