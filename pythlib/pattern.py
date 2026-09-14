@@ -87,8 +87,8 @@ class WrappedLib:
             ret = self.to_str(ret)
             if not ret.startswith('!'):
                 return ret
-            length = int(ret[1:])
-            return self(fname, [length], length)
+            length = int(ret[1:]) + 5
+            return self(fname, args[1], [length], length)
         return ret
 main_library = WrappedLib(find_lib())
 class PtStruct:

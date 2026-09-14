@@ -55,6 +55,7 @@ bo$obo$bo8$8bo$6bobo$5b2obo2$4b3o!
 b2o$3o$2obo$b3o$2bo!
 ''')
         pt2 = Pattern('xq4_6frc')
+        print(pt2.rle_string())
         self.assertEqual(pt1, pt2)
         self.assertTrue(pt1.nonempty())
         self.assertFalse(pt2.empty())

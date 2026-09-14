@@ -63,30 +63,30 @@ void* TransformPattern(void* ptr, const char* transformation) {
     Pattern* pt2 = new Pattern(pt->transform(transformation));
     return reinterpret_cast<void*>(pt2);
 }
-void GetPatternRLE(void* ptr, char* buffer, const size_t buflen) {
+void GetPatternRLE(void* ptr, char* buffer, const unsigned int buflen) {
     Pattern* pt = reinterpret_cast<Pattern*>(ptr);
     std::string rle = pt->rle_string();
     if (rle.length() < buflen) {
         const char* crle = rle.c_str();
-        memcpy(buffer, crle, strlen(crle));
+        memcpy(buffer, crle, strlen(crle)+1);
     }
     else {
         std::string errormsg = "!" + std::to_string(rle.length() + 5);
         const char* cerrormsg = errormsg.c_str();
-        memcpy(buffer, cerrormsg, strlen(cerrormsg));
+        memcpy(buffer, cerrormsg, strlen(cerrormsg)+1);
     }
 }
-void GetPatternApgcode(void* ptr, char* buffer, const size_t buflen) {
+void GetPatternApgcode(void* ptr, char* buffer, const unsigned int buflen) {
     Pattern* pt = reinterpret_cast<Pattern*>(ptr);
     std::string apgcode = pt->apgcode();
     if (apgcode.length() < buflen) {
         const char* crle = apgcode.c_str();
-        memcpy(buffer, crle, strlen(crle));
+        memcpy(buffer, crle, strlen(crle)+1);
     }
     else {
         std::string errormsg = "!" + std::to_string(apgcode.length() + 5);
         const char* cerrormsg = errormsg.c_str();
-        memcpy(buffer, cerrormsg, strlen(cerrormsg));
+        memcpy(buffer, cerrormsg, strlen(cerrormsg)+1);
     }
 }
 void GetPatternCoords(void* ptr, int32_t* buffer) {
