@@ -1,4 +1,4 @@
-// C++ functions handling hensel notation.
+// C++ functions handling Hensel notation.
 #pragma once
 #include <algorithm>
 #include <cstdlib>
@@ -7,10 +7,16 @@
 #include <string>
 #include <vector>
 #include "params.hpp"
+/* The subconditions allowed for each number of neighbours.
+e.g B1[ce], S2[aceikn]
+*/
 const std::vector<std::vector<std::string> > conditionvector = {{""}, {"c", "e"}, {"a","c","e","i","k","n"}, {"a","c","e","i","j","k","n","q","r","y"}, {"a","c","e","i","j","k","n","q","r","t","w","y","z"}, {"a","c","e","i","j","k","n","q","r","y"}, {"a","c","e","i","k","n"}, {"c", "e"}, {""}};
+
 const std::string uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const std::string lowercase = "abcdefghijklmnopqrstuvwxyz";
 umap<std::string, bool*> mainrulemap;
+// String based operations:
+// Replacement:
 std::string replace(const std::string string1, const std::string target, const std::string replacement) {
     std::string newstring(string1);
     size_t pos = newstring.find(target);
@@ -20,6 +26,7 @@ std::string replace(const std::string string1, const std::string target, const s
     }
     return newstring;
 }
+// Force lowercase:
 std::string tolower(const std::string instring) {
     int8_t i;
     std::string outstring = instring;
@@ -32,6 +39,7 @@ std::string tolower(const std::string instring) {
     }
     return outstring;
 }
+
 void parserule(const std::string rulestring, std::vector<std::string>& conditions) {
     std::string rule = tolower(rulestring);
     rule = replace(rule, "/", "");
@@ -293,7 +301,7 @@ void createconditions(const std::string rulestring, umap<std::string, bool*>* ru
     }
     (*rulemap)[rulestring] = conditionarr;
 }
-bool* getmap(std::string rule) {
+bool* getmap(const std::string rule) {
     if (mainrulemap.count(rule) != 0) {
         return mainrulemap[rule];
     }

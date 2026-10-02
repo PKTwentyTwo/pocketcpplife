@@ -4,7 +4,7 @@ import os
 import urllib.request
 from collections import defaultdict
 from .compiler import compilelibrary, libdir, rootdir
-from ..config import canoniserule
+from .config import canoniserule
 def find_lib():
     '''Returns a compiled library.'''
     target = libdir + '/' + 'main.so'
@@ -22,7 +22,7 @@ def load_restypes():
     for x in data:
         if len(x) < 5:
             continue
-        if x[0] in ('e', '#', '/', '}', ' ', '\t'):
+        if x[0] in ('e', '#', '*', '/', '}', ' ', '\t'):
             continue
         stringres, funcname = x[:x.index('(')].split(' ')
         rdict[funcname] = restype_dict[stringres]
@@ -90,7 +90,8 @@ class WrappedLib:
             length = int(ret[1:]) + 5
             return self(fname, args[1], [length], length)
         return ret
-main_library = WrappedLib(find_lib())
+#The actual library:
+lib = WrappedLib(find_lib())
 class PtStruct:
     '''Wrapper class used to avoid extra calls.'''
     def __init__(self, rule, ptr):
@@ -100,12 +101,11 @@ class Pattern:
     '''Main Pattern class.'''
     def __init__(self, rle = '', rule = 'b3s23'):
         self.rule = canoniserule(rule)
-        self.lib = main_library
         #Actually initialise the pattern:
         if isinstance(rle, str):
-            self.ptr = self.lib('NewPattern', rle, rule)
+            self.ptr = lib('NewPattern', rle, rule)
         elif isinstance(rle, Pattern):
-            self.ptr = self.lib('CopyPattern', rle.ptr)
+            self.ptr = lib('CopyPattern', rle.ptr)
             self.rule = rle.rule
         elif isinstance(rle, PtStruct):
             self.ptr = rle.ptr
@@ -115,24 +115,27 @@ class Pattern:
     #Most of the below functions are just C++ wrappers.
     def advance(self, gens):
         '''Advances a pattern the specified number of generations.'''
-        newptr = self.lib('AdvancePattern', self.ptr, gens)
+        newptr = lib('AdvancePattern', self.ptr, gens)
         return Pattern(PtStruct(self.rule, newptr), self.rule)
     def __getitem__(self, other):
         return self.advance(other)
     def rle_string(self) -> str:
         '''Gets the RLE string of a pattern.'''
-        return self.lib('GetPatternRLE', self.ptr, [2048], 2048)
+        return lib('GetPatternRLE', self.ptr, [2048], 2048)
     def empty(self) -> bool:
         '''Returns True if the pattern is empty.'''
-        return bool(self.lib('IsEmpty', self.ptr))
+        return bool(lib('IsEmpty', self.ptr))
     def nonempty(self) -> bool:
         '''Returns True if the pattern is non-empty.'''
-        return bool(self.lib('IsNonEmpty', self.ptr))
+        return bool(lib('IsNonEmpty', self.ptr))
     def __bool__(self):
         return self.nonempty()
+    def __nonzero__(self):
+        return self.nonempty()
+    
     def translate(self, dx, dy):
         '''Translates the pattern by (dx, dy).'''
-        newptr = self.lib('TranslatePattern', self.ptr, dx, dy)
+        newptr = lib('TranslatePattern', self.ptr, dx, dy)
         return Pattern(PtStruct(self.rule, newptr), self.rule)
     def shift(self, dx, dy):
         '''Shifts the pattern by (dx, dy).'''
@@ -142,7 +145,7 @@ class Pattern:
         transformations = ('identity', 'rot90', 'rot180', 'rot270', 'flip_x', 'flip_y', 'swap_xy', 'swap_xy_flip')
         if transformation not in transformations:
             raise ValueError('Transformation must be one of the following: '+str(transformations))
-        newptr = self.lib('TransformPattern', self.ptr, transformation)
+        newptr = lib('TransformPattern', self.ptr, transformation)
         return Pattern(PtStruct(self.rule, newptr), self.rule)
     def __call__(self, *args):
         if len(args) == 1:
@@ -152,30 +155,30 @@ class Pattern:
         raise TypeError("Usage: pt(dx, dy) or pt('rot90')")
     def digest(self) -> int:
         '''Calculates a position-independent orientation-dependent digest of the pattern.'''
-        return self.lib('GetDigest', self.ptr)
+        return lib('GetDigest', self.ptr)
     def __hash__(self):
         return self.digest()
     def __eq__(self, other):
         if not isinstance(other, Pattern):
             return False
-        return self.lib('IsEqual', self.ptr, other.ptr)
+        return lib('IsEqual', self.ptr, other.ptr)
     def __ne__(self, other):
         return not self == other
     def __add__(self, other):
         if not isinstance(other, Pattern):
             raise TypeError('Can only add other instances of Pattern to Pattern.')
-        newptr = self.lib('AddPattern', self.ptr, other.ptr)
+        newptr = lib('AddPattern', self.ptr, other.ptr)
         return Pattern(PtStruct(self.rule, newptr), self.rule)
     def __sub__(self, other):
         if not isinstance(other, Pattern):
             raise TypeError('Can only subtract other instances of Pattern from Pattern.')
-        newptr = self.lib('SubtractPattern', self.ptr, other.ptr)
+        newptr = lib('SubtractPattern', self.ptr, other.ptr)
         return Pattern(PtStruct(self.rule, newptr), self.rule)
     def getrect(self) -> list:
         '''Gets the bounding box of the pattern in the form [x, y, dx, dy].'''
         if self.empty():
             return None
-        rect = self.lib('GetPatternRect', self.ptr, [0, 0, 0, 0])
+        rect = lib('GetPatternRect', self.ptr, [0, 0, 0, 0])
         print(rect)
         return [rect[x] for x in range(4)]
     def coords(self) -> list:
@@ -185,7 +188,7 @@ class Pattern:
         pop = self.population
         buf1 = [0] * (pop * 2)
         buf2 = (c_int32 * (pop * 2))(*buf1)
-        self.lib('GetPatternCoords', self.ptr, buf2)
+        lib('GetPatternCoords', self.ptr, buf2)
         outcoords = []
         for x in range(pop):
             outcoords.append((buf2[2*x], buf2[2*x+1]))
@@ -197,37 +200,58 @@ class Pattern:
     @property
     def population(self) -> int:
         '''Gets the population of a pattern.'''
-        return self.lib('GetPopulation', self.ptr)
+        return lib('GetPopulation', self.ptr)
     @property
     def period(self) -> int:
         '''Gets the period of a pattern.
 Will throw an error if aperiodic.'''
-        period = self.lib('GetPeriod', self.ptr)
+        period = lib('GetPeriod', self.ptr)
         if period == 0:
             raise ValueError('Pattern is aperiodic.')
         return period
     @property
     def apgcode(self) -> str:
         '''Gets the apgcode of a pattern - 'aperiodic' if aperiodic.'''
-        return self.lib('GetPatternApgcode', self.ptr, [2048], 2048)
+        return lib('GetPatternApgcode', self.ptr, [2048], 2048)
+    @property
+    def wechsler(self) -> str:
+        '''Gets the Wechsler encoding of a pattern.'''
+        return lib('GetPatternWechsler', self.ptr, [2048], 2048)
     @property
     def displacement(self) -> tuple:
         '''Gets the displacement of a pattern - (0, 0) if aperiodic.'''
-        disp = self.lib('GetDisplacement', self.ptr, [0, 0])
+        disp = lib('GetDisplacement', self.ptr, [0, 0])
+        return (disp[0], disp[1])
+    @property
+    def firstcell(self) -> tuple:
+        '''Returns the first cell of a pattern.'''
+        disp = lib('GetFirstCell', self.ptr, [0, 0])
         return (disp[0], disp[1])
     def write_svg(self, filename, width=400, height=400, gens=None) -> int:
         '''Writes a Scalable Vector Graphics animation of the pattern to the given file.
 If the number of generations is not specified, one full period is animated.'''
         if gens is None:
-            length = self.lib('WriteSVG', self.ptr, filename, width, height)
+            length = lib('WriteSVG', self.ptr, filename, width, height)
         else:
-            length = self.lib('WriteSVGGens', self.ptr, filename, width, height, gens)
+            length = lib('WriteSVGGens', self.ptr, filename, width, height, gens)
         return length
+    def components(self) -> list:
+        '''Returns a list of kingwise connected components in the pattern.'''
+        #Copy the pattern:
+        pt2 = Pattern(self)
+        comp = []
+        #Iteratively grab a component and remove it until the pattern is empty:
+        while pt2.nonempty():
+            newptr = lib('GetPatternComponent', pt2.ptr)
+            new_pt = Pattern(PtStruct(self.rule, newptr), self.rule)
+            pt2 -= new_pt
+            comp.append(new_pt)
+        return comp
     def __del__(self):
         #Delete the C++ object:
         if hasattr(self, 'lib'):
-            if hasattr(self.lib, 'DeletePattern'):
-                self.lib('DeletePattern', self.ptr)
+            if hasattr(lib, 'DeletePattern'):
+                lib('DeletePattern', self.ptr)
     def __repr__(self):
         typename = str(type(self))[8:-2]      
         data = '(population = '+str(self.population)+', rule = '+self.rule+', pointer = '+str(self.ptr) + ')'
@@ -235,7 +259,6 @@ If the number of generations is not specified, one full period is animated.'''
 #Soup related functions that don't really fit as class methods:
 def hashsoup(rule = 'b3s23', instring = 'test', sym = 'C1'):
     '''Generates a soup based on an SHA-256 hash of the instring.'''
-    lib = main_library
     ptr = lib('PatternHashsoup', rule, instring, sym)
     pts = PtStruct(rule, ptr)
     pt = Pattern(pts, rule)

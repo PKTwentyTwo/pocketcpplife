@@ -5,7 +5,7 @@ import sys
 import time
 if os.name == 'nt':
     from .mingw64 import get_mingw_compiler
-from ..config import isvalid
+from .config import isvalid
 rootdir = os.path.dirname(os.path.dirname(__file__))
 libdir = rootdir
 def getcompiler():
@@ -14,20 +14,18 @@ Throws an error if compilation is not possible, and otherwise returns the compil
     #Use mingw64 on Windows:
     if os.name == 'nt':
         return get_mingw_compiler()
-    #Check that a c++ compiler is avaliable:
+    #Check that g++ compiler is avaliable:
     try:
-        compiler = subprocess.check_output(['/bin/bash', 'which', 'c++']).decode('utf-8').replace('\n', '')
+        compiler = subprocess.check_output(['/bin/bash', 'which', 'g++']).decode('utf-8').replace('\n', '')
     except subprocess.CalledProcessError:
         #Search on PATH:
         for x in sys.path:
-            file = x + '/c++'
+            file = x + '/g++'
             if os.path.isfile(file):
                 if os.access(file, os.X_OK):
-                    return x + '/c++'
+                    return x + '/g++'
         raise OSError('''A C++ compiler does not appear to be installed on this system.
-Try installing it with: one of the following:
-1. sudo apt install g++
-2. sudo apt install clang''')
+Try installing it with `sudo apt install g++`''')
     return compiler
 def compilelibrary(compilerargs = ['-std=c++17', '-O3', '-Os', '-Ofast', '-flto']):
     '''Compiles a shared library for the given rule.'''

@@ -25,7 +25,7 @@ Python bindings are avaliable by importing the library as a Python module contai
 
 Each ```pocketcpplife.Pattern``` instance stores only two pieces of data: the rule, and a pointer to a corresponding C++ pattern. Thus, all of the heavy lifting is done by C++, massively reducing the Python overhead.
 
-Compilation is done automatically if using the library from Python, using g++/clang on POSIX and mingw64 on Windows.
+Compilation is done automatically if using the library from Python, using g++/clang on POSIX and mingw64 on Windows (which is automatically installed).
 
 ### Other functions
 Other functions are avaliable for the Python bindings:

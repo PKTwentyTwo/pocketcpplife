@@ -480,6 +480,26 @@ std::string getapgcodesuffix(const ptvec& grid, const int32_t period, const std:
     }
     return bestapgcode;
 }
+std::string getwechsler(const ptvec& grid) {
+    bool wechslerknown = false;
+    std::string bestwechsler = "";
+    ptvec cgrid(grid);
+    for (auto i : orientations) {
+        ptvec cgrid2 = transformgrid(cgrid, i);
+        std::string gridwechsler = getgridapgcode(cgrid2);
+        if (wechslerknown == 0) {
+            bestwechsler = gridwechsler;
+            wechslerknown = 1;
+        }
+        else {
+            bestwechsler = compareapgcode(bestwechsler, gridwechsler);
+        }
+    }
+    if (bestwechsler.length() == 0) {
+        bestwechsler = "0";
+    }
+    return bestwechsler;
+}
 ptvec apgcodetogrid(const std::string apgcode) {
     int32_t xpos = 0;
     int32_t ypos = 0;
@@ -575,7 +595,7 @@ bool isapgcode(const std::string apgcode) {
         return 1;
     }
     return 0;
-}
+}  
 std::vector<ptvec> getcomponents(const ptvec& grid) {
     umap<int64_t, bool> processed;
     processed.reserve(9 * grid.size());
@@ -592,15 +612,25 @@ std::vector<ptvec> getcomponents(const ptvec& grid) {
         cellset.erase(first);
         processed[first] = true;
         ptvector.push_back(std::make_pair(x, y));
-        for (int i = -1;  i < 2; i++) {
-            for (int j = -1; j < 2; j++) {
-                if ((i  != 0) || (j != 0)) {
-                    int64_t key2 = tokey(x + i, y + j);
-                    if (!processed[key2]) {
-                        processed[key2] = true;
-                        if (cellset.find(key2) != cellset.end()) {
-                            cellset.erase(key2);
-                            ptvector.push_back(std::make_pair(x+i,y+j));
+        bool change = true;
+        while (change) {
+            change = false;
+            size_t ptvec_length = ptvector.size();
+            for (size_t a = 0; a < ptvec_length; a++) {
+                std::pair<int32_t, int32_t> cell = ptvector[a];
+                x = cell.first; y = cell.second;
+                for (int8_t i = -1;  i < 2; i++) {
+                    for (int8_t j = -1; j < 2; j++) {
+                        if ((i != 0) || (j != 0)) {
+                            int64_t key2 = tokey(x + i, y + j);
+                            if (!processed[key2]) {
+                                processed[key2] = true;
+                                if (cellset.find(key2) != cellset.end()) {
+                                    cellset.erase(key2);
+                                    change = true;
+                                    ptvector.push_back(std::make_pair(x+i,y+j));
+                                }
+                            }
                         }
                     }
                 }
@@ -609,4 +639,44 @@ std::vector<ptvec> getcomponents(const ptvec& grid) {
         components.push_back(ptvector);
     }
     return components;
+}
+ptvec getcomponent(const ptvec& grid) {
+    umap<int64_t, bool> processed;
+    processed.reserve(9 * grid.size());
+    std::set<int64_t> cellset;
+    for (auto i : grid) {
+        cellset.insert(tokey(i.first, i.second));
+    }
+    ptvec ptvector;
+    int64_t first = *cellset.begin();
+    int32_t x = getx(first);
+    int32_t y = gety(first);
+    cellset.erase(first);
+    processed[first] = true;
+    ptvector.push_back(std::make_pair(x, y));
+    bool change = true;
+    while (change) {
+        change = false;
+        size_t ptvec_length = ptvector.size();
+        for (size_t a = 0; a < ptvec_length; a++) {
+            std::pair<int32_t, int32_t> cell = ptvector[a];
+            x = cell.first; y = cell.second;
+            for (int8_t i = -1;  i < 2; i++) {
+                for (int8_t j = -1; j < 2; j++) {
+                    if ((i != 0) || (j != 0)) {
+                        int64_t key2 = tokey(x + i, y + j);
+                        if (!processed[key2]) {
+                            processed[key2] = true;
+                            if (cellset.find(key2) != cellset.end()) {
+                                cellset.erase(key2);
+                                change = true;
+                                ptvector.push_back(std::make_pair(x+i,y+j));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return ptvector;
 }

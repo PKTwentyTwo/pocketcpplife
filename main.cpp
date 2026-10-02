@@ -1,4 +1,7 @@
-// This file defines functions made available via Python bindings.
+/* This file defines functions made available via Python bindings.
+   Note that owing to the limitations of ctypes, Pattern* pointers
+   must be casted to void* before being passed as parameters or return values.
+*/
 #include "pattern.hpp"
 #include <fstream>
 extern "C" {
@@ -47,7 +50,7 @@ void* SubtractPattern(void* ptr1, void* ptr2) {
     Pattern* pt2 = reinterpret_cast<Pattern*>(ptr2);
     Pattern* pt3 = new Pattern(pt1->subpt(*pt2));
     return reinterpret_cast<void*>(pt3);
-}    
+}
 void* AdvancePattern(void* ptr, const int32_t gens) {
     Pattern* pt = reinterpret_cast<Pattern*>(ptr);
     Pattern* pt2 = new Pattern(pt->advance(gens));
@@ -78,13 +81,26 @@ void GetPatternRLE(void* ptr, char* buffer, const unsigned int buflen) {
 }
 void GetPatternApgcode(void* ptr, char* buffer, const unsigned int buflen) {
     Pattern* pt = reinterpret_cast<Pattern*>(ptr);
-    std::string apgcode = pt->apgcode();
+    const std::string apgcode = pt->apgcode();
     if (apgcode.length() < buflen) {
         const char* crle = apgcode.c_str();
         memcpy(buffer, crle, strlen(crle)+1);
     }
     else {
         std::string errormsg = "!" + std::to_string(apgcode.length() + 5);
+        const char* cerrormsg = errormsg.c_str();
+        memcpy(buffer, cerrormsg, strlen(cerrormsg)+1);
+    }
+}
+void GetPatternWechsler(void* ptr, char* buffer, const unsigned int buflen) {
+    Pattern* pt = reinterpret_cast<Pattern*>(ptr);
+    const std::string wechsler = pt->wechsler();
+    if (wechsler.length() < buflen) {
+        const char* crle = wechsler.c_str();
+        memcpy(buffer, crle, strlen(crle)+1);
+    }
+    else {
+        std::string errormsg = "!" + std::to_string(wechsler.length() + 5);
         const char* cerrormsg = errormsg.c_str();
         memcpy(buffer, cerrormsg, strlen(cerrormsg)+1);
     }
@@ -103,6 +119,12 @@ void GetPatternCoords(void* ptr, int32_t* buffer) {
 void GetDisplacement(void* ptr, int32_t* buffer) {
     Pattern* pt = reinterpret_cast<Pattern*>(ptr);
     std::pair<int32_t, int32_t> disp = pt->displacement();
+    buffer[0] = disp.first;
+    buffer[1] = disp.second;
+}
+void GetFirstCell(void* ptr, int32_t* buffer) {
+    Pattern* pt = reinterpret_cast<Pattern*>(ptr);
+    std::pair<int32_t, int32_t> disp = getfirstcell(pt->coords());
     buffer[0] = disp.first;
     buffer[1] = disp.second;
 }
@@ -131,6 +153,12 @@ uint64_t WriteSVGGens(void* ptr, const char* filename, const int width, const in
     uint64_t outlen = pt->write_svg(outfile, width, height, generations);
     outfile.close();
     return outlen;
+}
+
+void* GetPatternComponent(void* ptr) {
+    Pattern* pt = reinterpret_cast<Pattern*>(ptr);
+    Pattern* out_pt = new Pattern(getcomponent(pt->lifevector), pt->rule);
+    return reinterpret_cast<void*>(out_pt);
 }
 void* PatternHashsoup(const char* rule, const char* instring, const char* symmetry) {
     Pattern* pt = new Pattern(hashsoup(rule, instring, symmetry));

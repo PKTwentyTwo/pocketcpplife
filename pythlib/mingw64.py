@@ -1,6 +1,7 @@
 '''Includes functions for dealing with MinGW for compilation on Windows.'''
 import os
 import subprocess
+import sys
 from urllib.request import urlretrieve
 import zipfile
 rootdir = os.path.dirname(os.path.dirname(__file__))
@@ -47,4 +48,6 @@ def get_mingw_compiler():
     compilerloc = mingwdir + '/mingw/ucrt64/bin/g++.exe'
     if os.path.isfile(compilerloc):
         return os.path.realpath(compilerloc)
-    raise FileNotFoundError('mingw does not appear to be installed.\nTry pocketpylife.install_mingw()')
+    sys.stderr.write('Installing mingw...\n')
+    install_mingw()
+    return get_mingw_compiler()

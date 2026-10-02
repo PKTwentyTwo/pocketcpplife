@@ -4,6 +4,7 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 from pocketcpplife import *
 reset()
+recompile()
 import unittest
 class TestPatternMethods(unittest.TestCase):
 
@@ -68,7 +69,7 @@ b2o$3o$2obo$b3o$2bo!
         evsoup = pt[100]
         self.assertEqual(evsoup.period, 17)
         self.assertEqual(evsoup.apgcode, 'xp17_w8k80u1d6b6d1u08k8zciqa24kjge0egjk42aqiczdjmlg8ai2s0s2ia8glmjdzw4a40u1cokoc1u04a4zy31101011')
-
+        w = evsoup.wechsler
         #Stdin soup:
         pt2 = hashsoup('b3s23', 'k_w9NBaGgwCBHi-2bo$bobo$o3bo$bo3bo$2bo3bo$3bo3bo$4bobo$5bo6$7bo$7bo$6bobo$7bo$7bo-$7bo$7bo$6bobo$7bo$7bo!', 'PK22_Test_stdin')
         self.assertEqual(pt2.period, 120)

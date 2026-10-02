@@ -1,6 +1,5 @@
 // Header storing the main Pattern class.
 #pragma once
-#include <cstdint>
 #include <ostream>
 #include <string>
 #include <utility>
@@ -35,18 +34,18 @@ class Pattern {
         rule = ptr->getrule();
     }
     Pattern& operator=(const Pattern& that) {
-        lifevector = that.coords();
-        rule = that.getrule();
+        lifevector = that.lifevector;
+        rule = that.rule;
         return *this;
     }
     ~Pattern() {}
-    Pattern advance(uint32_t generations) const {
+    Pattern advance(const uint32_t generations) const {
         ptvec lifevector2(lifevector);
         cppadvance(lifevector2, generations, rule);
         Pattern* newptr = new Pattern(lifevector2, rule);
         return *newptr;
     }
-    Pattern operator[](uint32_t numgens) const {
+    Pattern operator[](const uint32_t numgens) const {
         return advance(numgens);
     }
     ptvec coords() const {
@@ -64,10 +63,10 @@ class Pattern {
     std::string getrule() const {
         return rule;
     }
-    bool empty() {
+    bool empty() const {
         return (lifevector.size() == 0);
     }
-    bool nonempty() {
+    bool nonempty() const {
         return (lifevector.size() != 0);
     }
     std::string getrle() const {
@@ -99,7 +98,7 @@ class Pattern {
         int32_t* bbox2 = pt2.getrect();
         return std::make_pair(bbox2[0] - bbox1[0], bbox2[1] - bbox1[1]);
     }
-    std::pair<int32_t, int32_t> displacement(uint32_t ptperiod) {
+    std::pair<int32_t, int32_t> displacement(const uint32_t ptperiod) const {
         if (ptperiod == 0) {
             return std::make_pair(0, 0);
         }
@@ -108,65 +107,65 @@ class Pattern {
         int32_t* bbox2 = pt2.getrect();
         return std::make_pair(bbox2[0] - bbox1[0], bbox2[1] - bbox1[1]);
     }
-    Pattern translate(const int32_t dx, const int32_t dy) {
+    Pattern translate(const int32_t dx, const int32_t dy) const {
         ptvec lifevector2;
         lifevector2.reserve(lifevector.size());
         lifevector2 = translategrid(lifevector, dx, dy);
         return Pattern(lifevector2, rule);
     }
-    Pattern operator()(const int32_t dx, const int32_t dy) {
+    Pattern operator()(const int32_t dx, const int32_t dy) const {
         return this->translate(dx, dy);
     }
-    Pattern transform(std::string transformation) {
+    Pattern transform(const std::string transformation) const {
         ptvec lifevector2;
         lifevector2.reserve(lifevector.size());
         lifevector2 = transformgrid(lifevector, transformation);
         return Pattern(lifevector2, rule);
     }
-    Pattern operator()(std::string transformation) {
+    Pattern operator()(std::string transformation) const {
         return this->transform(transformation);
     }
-    Pattern addpt(Pattern& other) {
+    Pattern addpt(const Pattern& other) const {
         ptvec vector2 = other.coords();
         ptvec newvector = applyADD(lifevector, vector2);
         return Pattern(newvector, rule);
     }
-    Pattern operator+(Pattern& other) {
+    Pattern operator+(const Pattern& other) const {
         return this->addpt(other);
     }
-    Pattern operator+=(Pattern& other) {
+    Pattern operator+=(const Pattern& other) {
         Pattern newpt = this->addpt(other);
         lifevector = newpt.coords();
         return *this;
     }
-    Pattern subpt(Pattern& other) {
+    Pattern subpt(const Pattern& other) const {
         ptvec vector2 = other.coords();
         ptvec newvector = applySUB(lifevector, vector2);
         return Pattern(newvector, rule);
     }
-    Pattern operator-(Pattern& other) {
+    Pattern operator-(const Pattern& other) const {
         return this->subpt(other);
     }
-    Pattern operator-=(Pattern& other) {
+    Pattern operator-=(const Pattern& other) {
         Pattern newpt = this->subpt(other);
         lifevector = newpt.coords();
         return *this;
     }
-    Pattern andpt(Pattern& other) {
+    Pattern andpt(const Pattern& other) const {
         ptvec vector2 = other.coords();
         ptvec newvector = applyAND(lifevector, vector2);
         return Pattern(newvector, rule);
     }
-    Pattern operator&(Pattern& other) {
+    Pattern operator&(Pattern& other) const {
         return this->andpt(other);
     }
-    std::string apgcode() {
-        uint32_t ptperiod = this->period();
+    std::string apgcode() const {
+        const uint32_t ptperiod = this->period();
         if (ptperiod == 0) {
             return "aperiodic";
         }
-        std::string suffix = getapgcodesuffix(lifevector, ptperiod, rule);
-        std::pair<int32_t, int32_t> disp = this->displacement(ptperiod);
+        const std::string suffix = getapgcodesuffix(lifevector, ptperiod, rule);
+        const std::pair<int32_t, int32_t> disp = this->displacement(ptperiod);
         if ((disp.first) || (disp.second)) {
             return "xq" + std::to_string(ptperiod) + "_" + suffix;
         }
@@ -177,16 +176,16 @@ class Pattern {
             return "xp" + std::to_string(ptperiod) + "_" + suffix;
         }
     }
-    std::string wechsler() {
-        return getgridapgcode(lifevector);
+    std::string wechsler() const {
+        return getwechsler(lifevector);
     }
-    bool operator==(Pattern& other) {
+    bool operator==(Pattern& other) const {
         return (this->digest() == other.digest());
     }
-    bool operator!=(Pattern& other) {
+    bool operator!=(Pattern& other) const {
         return (!(*this == other));
     }
-    size_t write_svg(std::ostream& outstream, const int width, const int height, const int period) {
+    size_t write_svg(std::ostream& outstream, const int width, const int height, const int period) const {
         std::string graphic;
         if ((period <= 1) || (period > SVG_MAX)) {
             graphic = svg_still(lifevector, width, height);
@@ -197,8 +196,8 @@ class Pattern {
         outstream << graphic;
         return graphic.length();
     }
-    size_t write_svg(std::ostream& outstream, const int width, const int height) {
-        std::string code = this->apgcode();
+    size_t write_svg(std::ostream& outstream, const int width, const int height) const {
+        const std::string code = this->apgcode();
         if (code[0] != 'x') {
             return this->write_svg(outstream, width, height, 1);
         }
@@ -210,7 +209,18 @@ class Pattern {
         }
         return this->write_svg(outstream, width, height, this->period());
     }
+    std::vector<Pattern*> components() {
+        std::vector<ptvec> gridcomp = getcomponents(lifevector);
+        std::vector<Pattern*> outvector;
+        outvector.reserve(gridcomp.size());
+        for (auto i : gridcomp) {
+            Pattern* ptr = new Pattern(i, rule);
+            outvector.push_back(ptr);
+        }
+        return outvector;
+    }
 };
+// Other functions:
 Pattern hashsoup(const std::string rule, const std::string instring, std::string sym) {
     ptvec soup = _hashsoup(instring, sym);
     return Pattern(soup, rule);
