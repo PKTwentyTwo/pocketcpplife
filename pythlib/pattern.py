@@ -249,9 +249,7 @@ If the number of generations is not specified, one full period is animated.'''
         return comp
     def __del__(self):
         #Delete the C++ object:
-        if hasattr(self, 'lib'):
-            if hasattr(lib, 'DeletePattern'):
-                lib('DeletePattern', self.ptr)
+        lib('DeletePattern', self.ptr)
     def __repr__(self):
         typename = str(type(self))[8:-2]      
         data = '(population = '+str(self.population)+', rule = '+self.rule+', pointer = '+str(self.ptr) + ')'
